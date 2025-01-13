@@ -20,7 +20,7 @@ namespace UIAssets
         public UIVideoPlayer()
         {
             style.flexDirection = FlexDirection.Column;
-            style.flexGrow = 1;
+            
 
             _videoContainer = new VisualElement();
             _videoContainer.style.width = Length.Percent(100);
