@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UIAssets
+namespace PlaytestingReviewer.Video
 {
     [UxmlElement]
     public partial class UIVideoPlayer : VisualElement
