@@ -5,12 +5,11 @@ using UnityEngine.UIElements;
 namespace PlaytestingReviewer.Video
 {
     [UxmlElement]
-    public partial class UIVideoPlayer : VisualElement
+    public partial class UIVideoPlayer : VisualElement, IVideoPlayer
     {
         private string _defaultImagePath = PathManager.DefaultImagePath;
         private string _defaultVideoPath = PathManager.DefaultVideoPath;
 
-        private Button _playButton, _pauseButton, _stopButton;
         private VisualElement _buttonsContainer;
         private VisualElement _videoContainer;
         private Image _videoRenderer;
@@ -19,22 +18,21 @@ namespace PlaytestingReviewer.Video
 
         public UIVideoPlayer()
         {
-            style.flexDirection = FlexDirection.Column;
+            style.flexDirection = FlexDirection.Row;
             style.flexGrow = 1;
 
             _videoContainer = new VisualElement();
-            _videoContainer.style.width = Length.Percent(100);
-            _videoContainer.RegisterCallback<GeometryChangedEvent>(OnVideoContainerResized);
+            _videoContainer.style.alignItems = Align.FlexStart;
+            _videoContainer.style.flexGrow = 0;
+
 
             Add(_videoContainer);
 
             _videoRenderer = new Image();
-            _videoRenderer.style.width = Length.Percent(100);
-            _videoRenderer.style.height = Length.Percent(100);
-            _videoRenderer.scaleMode = ScaleMode.ScaleToFit;
             _videoRenderer.image = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
-
             _videoContainer.Add(_videoRenderer);
+            _videoContainer.style.alignSelf = Align.FlexStart;
+
 
             var defaultTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
             if (defaultTexture != null)
@@ -46,42 +44,8 @@ namespace PlaytestingReviewer.Video
                 Debug.LogWarning($"Default image not found at '{_defaultImagePath}'");
             }
 
-            _buttonsContainer = new VisualElement
-            {
-                style = { flexDirection = FlexDirection.Row }
-            };
-            Add(_buttonsContainer);
-            _playButton = new Button(PlayVideo) { text = "Play" };
-            _pauseButton = new Button(PauseVideo) { text = "Pause" };
-            _stopButton = new Button(StopVideo) { text = "Stop" };
-
-            var buttons = new[] { _playButton, _pauseButton, _stopButton };
-            foreach (var button in buttons)
-            {
-                button.style.width = 40;
-                button.style.height = 30;
-                button.style.borderBottomWidth = 0;
-                button.style.borderTopWidth = 0;
-                button.style.borderLeftWidth = 0;
-                button.style.borderRightWidth = 0;
-                button.style.marginLeft = 1;
-                button.style.marginRight = 1;
-            }
-
-            _buttonsContainer.Add(_playButton);
-            _buttonsContainer.Add(_pauseButton);
-            _buttonsContainer.Add(_stopButton);
-
             InitializeVideoPlayer();
             RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
-        }
-
-        private void OnVideoContainerResized(GeometryChangedEvent evt)
-        {
-            float containerWidth = _videoContainer.resolvedStyle.width;
-            float desiredHeight = containerWidth * (9f / 16f);
-
-            _videoContainer.style.height = desiredHeight;
         }
 
         private void InitializeVideoPlayer()
@@ -101,6 +65,68 @@ namespace PlaytestingReviewer.Video
 
         }
 
+        public void Play()
+        {
+            if (_videoPlayer != null && !_videoPlayer.isPlaying)
+            {
+                _videoPlayer.Play();
+            }
+        }
+
+        public void Pause()
+        {
+            if (_videoPlayer != null && _videoPlayer.isPlaying)
+            {
+                _videoPlayer.Pause();
+            }
+        }
+
+        public void Stop()
+        {
+            if (_videoPlayer != null)
+            {
+                _videoPlayer.Stop();
+            }
+        }
+        public void NextFrame(int frameCount = 1)
+        {
+            if (_videoPlayer == null || _videoPlayer.isPlaying) {return;}
+
+            if((ulong)(_videoPlayer.frame + frameCount) <= _videoPlayer.frameCount)
+            {
+                _videoPlayer.frame += frameCount;
+            }
+            
+            UpdateVideoFrame();
+        }
+
+        public void PreviousFrame(int frameCount = 1)
+        {
+            if (_videoPlayer == null || _videoPlayer.isPlaying) {return;}
+
+            if(_videoPlayer.frame - frameCount >= 0)
+            {
+                _videoPlayer.frame -= frameCount;
+            }
+
+            UpdateVideoFrame();
+        }
+
+        public void GoToStart()
+        {
+            _videoPlayer.frame = 0;
+        }
+
+        public void GoToEnd()
+        {
+            _videoPlayer.frame = (long)_videoPlayer.frameCount-1;
+        }
+
+        public bool IsPlaying()
+        {
+            return _videoPlayer.isPlaying;
+        }
+
 
         public void UpdateVideoFrame()
         {
@@ -117,30 +143,6 @@ namespace PlaytestingReviewer.Video
             }
         }
 
-        private void PlayVideo()
-        {
-            if (_videoPlayer != null && !_videoPlayer.isPlaying)
-            {
-                _videoPlayer.Play();
-            }
-        }
-
-        private void PauseVideo()
-        {
-            if (_videoPlayer != null && _videoPlayer.isPlaying)
-            {
-                _videoPlayer.Pause();
-            }
-        }
-
-        private void StopVideo()
-        {
-            if (_videoPlayer != null)
-            {
-                _videoPlayer.Stop();
-            }
-        }
-
         private void OnDetachFromPanel(DetachFromPanelEvent evt)
         {
             EditorApplication.update -= UpdateVideoFrame;
@@ -154,5 +156,7 @@ namespace PlaytestingReviewer.Video
                 UnityEngine.Object.DestroyImmediate(_videoPlayer.gameObject);
             }
         }
+
+
     }
 }
