@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 949445343}
   - component: {fileID: 949445342}
+  - component: {fileID: 949445344}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Untagged
@@ -206,6 +207,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!320 &949445344
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949445341}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: fdfbbbcc0a4dc0a40977e0f7c663c19c, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
 --- !u!1 &1250193247
 GameObject:
   m_ObjectHideFlags: 0

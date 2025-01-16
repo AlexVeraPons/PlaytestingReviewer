@@ -127,6 +127,17 @@ namespace PlaytestingReviewer.Video
             return _videoPlayer.isPlaying;
         }
 
+        public float GetVideoLength()
+        {
+            if(_videoPlayer == null)
+            {
+                Debug.LogWarning("Video player is null");
+                return 0;
+            }
+
+            return (float)_videoPlayer.length;
+        }
+
 
         public void UpdateVideoFrame()
         {

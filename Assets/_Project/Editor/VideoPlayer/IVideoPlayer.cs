@@ -39,5 +39,7 @@ namespace PlaytestingReviewer.Video
         void GoToEnd();
 
         bool IsPlaying();
+
+        float GetVideoLength();
     }
 }
