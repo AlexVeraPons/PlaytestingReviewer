@@ -7,8 +7,8 @@ namespace PlaytestingReviewer.Editor
 {
     public class TimeIndicatorController
     {
-        private const int InitialSpaceBetweenIndicators = 10;
-        private const int MaxSpaceBetweenIndicators = 20;
+        private const int InitialSpaceBetweenIndicators = 13;
+        private const int MinimumSpaceBetweenIndicators = 3;
         private const float LabelSize = 20f;
 
         private List<Label> _timeIndicators;
@@ -18,8 +18,6 @@ namespace PlaytestingReviewer.Editor
         
         private float _currentSpaceBetweenIndicators = 10f;
         private float _videoLength;
-        
-
 
         public TimeIndicatorController(VisualElement root)
         {
@@ -87,6 +85,12 @@ namespace PlaytestingReviewer.Editor
         private void ZoomTimeIndicators(float amount)
         {
             _currentSpaceBetweenIndicators += amount;
+
+            if (_currentSpaceBetweenIndicators < MinimumSpaceBetweenIndicators)
+            {
+                _currentSpaceBetweenIndicators = MinimumSpaceBetweenIndicators;
+            }
+
             foreach (VisualElement indicator in _timeIndicators)
             {
                 indicator.style.marginLeft = _currentSpaceBetweenIndicators;
