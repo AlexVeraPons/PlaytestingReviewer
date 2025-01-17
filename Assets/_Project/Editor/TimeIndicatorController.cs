@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using UnityEditor;
+using PlaytestingReviewer.Video;
+using Unity.VisualScripting;
+using System;
 
 namespace PlaytestingReviewer.Editor
 {
@@ -14,15 +17,21 @@ namespace PlaytestingReviewer.Editor
         private List<Label> _timeIndicators;
         private ScrollView timeScroll;
         private VisualElement timeView;
-        
-        
+
         private float _currentSpaceBetweenIndicators = 10f;
         private float _videoLength;
+        private IVideoPlayer _videoPlayer;
 
-        public TimeIndicatorController(VisualElement root)
+        private bool _mouseDown;
+
+        public TimeIndicatorController(VisualElement root, IVideoPlayer videoPlayer)
         {
             SetUpTimeControl(root);
+            _videoPlayer = videoPlayer;
+
+            timeView.RegisterCallback<MouseDownEvent>(OnMouseDown);
         }
+
 
         private void SetUpTimeControl(VisualElement root)
         {
@@ -42,8 +51,21 @@ namespace PlaytestingReviewer.Editor
             for (int i = 0; i < indicatorCount; i++)
             {
                 Label indicator = new Label { text = i.ToString() };
+
                 indicator.AddToClassList("timeControl");
-                indicator.style.marginLeft = InitialSpaceBetweenIndicators;
+
+                if (i == 0)
+                {
+                    indicator.style.paddingLeft = 0;
+
+                    indicator.style.marginLeft = 0;
+                }
+                else
+                {
+                    indicator.style.paddingLeft = 0;
+                    indicator.style.marginLeft = InitialSpaceBetweenIndicators;
+                }
+
                 timeView.contentContainer.Add(indicator);
                 _timeIndicators.Add(indicator);
             }
@@ -98,5 +120,40 @@ namespace PlaytestingReviewer.Editor
             }
         }
 
+        public float GetStartLabelPosition()
+        {
+            return _timeIndicators[0].resolvedStyle.marginLeft;
+        }
+
+        public float GetWorldPositionOfTime(float time)
+        {
+            if (_timeIndicators == null) { return 0; }
+            float initialLabel = _timeIndicators[0].worldBound.x;
+
+
+            float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
+            float videoLength = _videoLength;
+            return Mathf.Lerp(initialLabel, lastLabel, time / videoLength);
+        }
+        private void OnMouseDown(MouseDownEvent evt)
+        {
+            if (evt.button == 0)
+            {
+                Vector2 mousePosition = evt.mousePosition;
+                float time = GetTimeFromWorldPosition(mousePosition.x);
+                int targetFrame = Mathf.FloorToInt(time * _videoPlayer.GetVideoLengthFrames() / _videoLength);
+                _videoPlayer.SetFrame(targetFrame);
+            }
+        }
+
+        private float GetTimeFromWorldPosition(float x)
+        {
+            float initialLabel = _timeIndicators[0].worldBound.x;
+            float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
+            float videoLength = _videoLength;
+            return Mathf.Lerp(0, videoLength, (x - initialLabel) / (lastLabel - initialLabel));
+        }
     }
 }
+
+

@@ -12,6 +12,7 @@ namespace PlaytestingReviewer.Editor
 
         private VideoController _videoController;
         private TimeIndicatorController _timeIndicatorController;
+        private TimeNeedle _timeNeedle;
 
         [MenuItem("Tools/PlaytestReviewerEditor")]
         public static void ShowEditorWindow()
@@ -47,9 +48,10 @@ namespace PlaytestingReviewer.Editor
         private void InitializeControllers()
         {
             _videoController = new VideoController(rootVisualElement);
-            _timeIndicatorController = new TimeIndicatorController(rootVisualElement);
+            _timeIndicatorController = new TimeIndicatorController(rootVisualElement, _videoController.VideoPlayer);
             _videoController.OnNewVideoLengthAvailable += _timeIndicatorController.ReloadIndicators;
-
+            _timeNeedle = new TimeNeedle(rootVisualElement, _timeIndicatorController, _videoController.VideoPlayer);
+            _videoController.OnPlay += _timeNeedle.Initialize;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace PlaytestingReviewer.Video
         private Image _videoRenderer;
         private UnityEngine.Video.VideoPlayer _videoPlayer;
         private RenderTexture _renderTexture;
+        private float _currentTime = 0;
 
         public UIVideoPlayer()
         {
@@ -70,6 +71,7 @@ namespace PlaytestingReviewer.Video
             if (_videoPlayer != null && !_videoPlayer.isPlaying)
             {
                 _videoPlayer.Play();
+                _videoPlayer.time = _currentTime;
             }
         }
 
@@ -78,6 +80,7 @@ namespace PlaytestingReviewer.Video
             if (_videoPlayer != null && _videoPlayer.isPlaying)
             {
                 _videoPlayer.Pause();
+                _currentTime = (float)_videoPlayer.time;
             }
         }
 
@@ -90,21 +93,21 @@ namespace PlaytestingReviewer.Video
         }
         public void NextFrame(int frameCount = 1)
         {
-            if (_videoPlayer == null || _videoPlayer.isPlaying) {return;}
+            if (_videoPlayer == null || _videoPlayer.isPlaying) { return; }
 
-            if((ulong)(_videoPlayer.frame + frameCount) <= _videoPlayer.frameCount)
+            if ((ulong)(_videoPlayer.frame + frameCount) <= _videoPlayer.frameCount)
             {
                 _videoPlayer.frame += frameCount;
             }
-            
+
             UpdateVideoFrame();
         }
 
         public void PreviousFrame(int frameCount = 1)
         {
-            if (_videoPlayer == null || _videoPlayer.isPlaying) {return;}
+            if (_videoPlayer == null || _videoPlayer.isPlaying) { return; }
 
-            if(_videoPlayer.frame - frameCount >= 0)
+            if (_videoPlayer.frame - frameCount >= 0)
             {
                 _videoPlayer.frame -= frameCount;
             }
@@ -119,7 +122,7 @@ namespace PlaytestingReviewer.Video
 
         public void GoToEnd()
         {
-            _videoPlayer.frame = (long)_videoPlayer.frameCount-1;
+            _videoPlayer.frame = (long)_videoPlayer.frameCount - 1;
         }
 
         public bool IsPlaying()
@@ -129,7 +132,7 @@ namespace PlaytestingReviewer.Video
 
         public float GetVideoLength()
         {
-            if(_videoPlayer == null)
+            if (_videoPlayer == null)
             {
                 Debug.LogWarning("Video player is null");
                 return 0;
@@ -168,6 +171,58 @@ namespace PlaytestingReviewer.Video
             }
         }
 
+        public float GetVideoLengthSeconds()
+        {
+            float videoLength = 0;
+            if (_videoPlayer != null)
+            {
+                videoLength = (float)_videoPlayer.length;
+            }
 
+            return videoLength;
+        }
+
+        public float GetCurrentTime()
+        {
+            float currentTime = 0;
+            if (_videoPlayer != null)
+            {
+                currentTime = (float)_videoPlayer.time;
+            }
+
+            return currentTime;
+        }
+
+        public int GetVideoLengthFrames()
+        {
+            int videoLengthFrames = 0;
+            if (_videoPlayer != null)
+            {
+                videoLengthFrames = (int)_videoPlayer.frameCount;
+            }
+
+            return videoLengthFrames;
+        }
+
+        public int GetCurrentFrame()
+        {
+            int currentFrame = 0;
+            if (_videoPlayer != null)
+            {
+                currentFrame = (int)_videoPlayer.frame;
+            }
+
+            return currentFrame;
+        }
+
+        public void SetFrame(int frame)
+        {
+            if (_videoPlayer == null) { return; }
+
+            if (frame >= 0 && frame < (long)_videoPlayer.frameCount)
+            {
+                _videoPlayer.frame = frame;
+            }
+        }
     }
 }
