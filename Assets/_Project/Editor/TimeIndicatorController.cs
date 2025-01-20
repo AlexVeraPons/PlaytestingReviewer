@@ -11,7 +11,6 @@ namespace PlaytestingReviewer.Editor
     public class TimeIndicatorController
     {
         private const int InitialSpaceBetweenIndicators = 13;
-        private const int MinimumSpaceBetweenIndicators = 3;
         private const float LabelSize = 20f;
 
         private List<Label> _timeIndicators;
@@ -24,10 +23,14 @@ namespace PlaytestingReviewer.Editor
 
         private bool _mouseDown;
 
-        public TimeIndicatorController(VisualElement root, IVideoPlayer videoPlayer)
+        private ZoomUpdater _zoomUpdater;
+
+        public TimeIndicatorController(VisualElement root, IVideoPlayer videoPlayer, ZoomUpdater zoomUpdater)
         {
-            SetUpTimeControl(root);
+            _zoomUpdater = zoomUpdater;
             _videoPlayer = videoPlayer;
+
+            SetUpTimeControl(root);
 
             timeView.RegisterCallback<MouseDownEvent>(OnMouseDown);
         }
@@ -38,7 +41,8 @@ namespace PlaytestingReviewer.Editor
             timeScroll = root.Q<ScrollView>("TimeScroll");
             timeView = root.Q<VisualElement>("TimeView");
 
-            timeScroll.RegisterCallback<WheelEvent>(OnMouseScroll);
+            timeScroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            _zoomUpdater.OnZoomed += ZoomTimeIndicators;
         }
 
         public void ReloadIndicators(float videoLength)
@@ -96,22 +100,9 @@ namespace PlaytestingReviewer.Editor
             return labels;
         }
 
-        private void OnMouseScroll(WheelEvent evt)
-        {
-            if (evt.ctrlKey)
-            {
-                ZoomTimeIndicators(evt.delta.y);
-            }
-        }
-
         private void ZoomTimeIndicators(float amount)
         {
             _currentSpaceBetweenIndicators += amount;
-
-            if (_currentSpaceBetweenIndicators < MinimumSpaceBetweenIndicators)
-            {
-                _currentSpaceBetweenIndicators = MinimumSpaceBetweenIndicators;
-            }
 
             foreach (VisualElement indicator in _timeIndicators)
             {

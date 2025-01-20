@@ -35,7 +35,6 @@ namespace PlaytestingReviewer.Editor
             _timeNeedle.style.left = desiredPosition;
 
         }
-
         public void Initialize()
         {
             SetUpTimeNeedle(_root);
