@@ -57,6 +57,12 @@ namespace PlaytestingReviewer.Editor
             _videoController.OnNewVideoLengthAvailable += _timeIndicatorController.ReloadIndicators;
             _timeNeedle = new TimeNeedle(rootVisualElement, _timeIndicatorController, _videoController.VideoPlayer);
             _videoController.OnPlay += _timeNeedle.Initialize;
+
+
+            var trackDescription = rootVisualElement.Q<VisualElement>("TrackDescriptions");
+            var trackInformation = rootVisualElement.Q<VisualElement>("TrackInformation");
+
+            var track = new Track(trackDescription,trackInformation);
         }
     }
 }
