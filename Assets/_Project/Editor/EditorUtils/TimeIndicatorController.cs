@@ -129,7 +129,7 @@ namespace PlaytestingReviewer.Editor
             float initialLabel = _timeIndicators[0].worldBound.x;
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
             float videoLength = _videoLength;
-            return Mathf.Lerp(0, videoLength, (x - initialLabel) / (lastLabel - initialLabel));
+            return Mathf.Lerp(0, videoLength, x / (lastLabel - initialLabel));
         } 
         private void OnMouseDown(MouseDownEvent evt)
         {
@@ -148,6 +148,15 @@ namespace PlaytestingReviewer.Editor
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
             float videoLength = _videoLength;
             return Mathf.Lerp(0, videoLength, (x - initialLabel) / (lastLabel - initialLabel));
+        }
+
+        public bool SetupComplete()
+        {
+            if(_timeIndicators == null || _timeIndicators.Count == 0) {return false;}
+
+            if(_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) {return false;}
+
+            return true;
         }
     }
 }

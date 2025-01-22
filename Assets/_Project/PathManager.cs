@@ -9,6 +9,7 @@ namespace PlaytestingReviewer
         public static string DefaultVideoPath => "Assets/_Project/Videos/sample1Video.mp4";
         public static string FFmpegPath =>  Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
         public static string VideoOutputPath => Application.streamingAssetsPath + "/Output";
+        public static string FrameOutputPath =>  Application.streamingAssetsPath + "/Frames";
         public static string PlaytestReviewerUXMLPath => "Assets/_Project/Editor/PlaytestReviewer.uxml";
         public static string PlaytestReviewerUSSPath => "Assets/_Project/Editor/PlaytestReviewer.uss";
     }

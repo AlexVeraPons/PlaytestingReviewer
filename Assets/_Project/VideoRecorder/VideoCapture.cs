@@ -135,7 +135,7 @@ namespace PlaytestingReviewer.Video
         {
             if (isCapturing)
             {
-                SyncCaptureCamera();  // Sync camera settings every frame
+                SyncCaptureCamera();  
 
                 timeSinceLastFrame += Time.deltaTime;
 

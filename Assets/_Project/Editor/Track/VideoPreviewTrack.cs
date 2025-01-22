@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using PlaytestingReviewer.Video;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,11 +12,29 @@ namespace PlaytestingReviewer.Editor
 
         private const int pixelHeight = 55;
         private const int pixelWidth = 80;
-        private List<VisualElement> previews = new List<VisualElement>();
+        private List<Image> _previews;
+
+        private bool _inNeedOfImages = false;
         public VideoPreviewTrack(VisualElement description, VisualElement information, IProvideTimeRelations timeRelations, IVideoPlayer videoPlayer)
         : base(description, information, timeRelations)
         {
             _videoPlayer = videoPlayer;
+            _previews = new List<Image>();
+            _timeRelations = timeRelations;
+            EditorApplication.update += Update;
+        }
+
+        private void Update()
+        {
+            if (_inNeedOfImages == false) { return; }
+            if (_timeRelations.SetupComplete() == false) { return; }
+
+            _inNeedOfImages = false;
+
+            foreach (Image preview in _previews)
+            {
+                float time = _timeRelations.GetTimeFromLeftWorldPosition(preview.resolvedStyle.left);
+            }
         }
 
         protected override void PreInitialization()
@@ -24,11 +43,10 @@ namespace PlaytestingReviewer.Editor
         }
         protected override void OnResize(VisualElement informationZone)
         {
-            // Create Previews
             int ammountOfPreviews = (int)informationZone.resolvedStyle.width / pixelWidth;
             for (int i = 0; i < ammountOfPreviews; i++)
             {
-                VisualElement previewBox = new VisualElement();
+                Image previewBox = new Image();
                 previewBox.style.width = pixelWidth;
                 previewBox.style.height = pixelHeight;
                 previewBox.style.backgroundColor = new StyleColor(UnityEngine.Color.black);
@@ -38,18 +56,10 @@ namespace PlaytestingReviewer.Editor
                     UnityEngine.Random.value));
 
                 informationZone.Add(previewBox);
-                previews.Add(previewBox);
-                // Populate the Preview
+                _previews.Add(previewBox);
             }
 
-            foreach (VisualElement preview in previews)
-            {
-                float time = _timeRelations.GetTimeFromLeftWorldPosition(preview.resolvedStyle.left);
-                Texture2D backgroundTexture = _videoPlayer.GetTextureInTime(time);
-
-                preview.style.backgroundImage = backgroundTexture;
-            }
-
+            _inNeedOfImages = true;
         }
     }
 }

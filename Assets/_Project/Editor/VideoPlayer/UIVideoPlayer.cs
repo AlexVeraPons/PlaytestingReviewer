@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Image = UnityEngine.UIElements.Image;
@@ -225,37 +226,6 @@ namespace PlaytestingReviewer.Video
             {
                 _videoPlayer.frame = frame;
             }
-        }
-
-        public Texture2D GetTextureInTime(float time)
-        {
-            if (_videoPlayer == null)
-            {
-            Debug.LogWarning("Video player is null");
-            return null;
-            }
-
-            bool wasPlaying = _videoPlayer.isPlaying;
-            _videoPlayer.Pause();
-            _videoPlayer.time = time;
-            _videoPlayer.Play();
-            _videoPlayer.Pause();
-
-            RenderTexture currentRT = RenderTexture.active;
-            RenderTexture.active = _renderTexture;
-
-            Texture2D texture = new Texture2D(_renderTexture.width, _renderTexture.height, TextureFormat.RGB24, false);
-            texture.ReadPixels(new Rect(0, 0, _renderTexture.width, _renderTexture.height), 0, 0);
-            texture.Apply();
-
-            RenderTexture.active = currentRT;
-
-            if (wasPlaying)
-            {
-            _videoPlayer.Play();
-            }
-
-            return texture;
         }
     }
 }

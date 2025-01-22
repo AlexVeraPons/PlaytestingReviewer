@@ -72,7 +72,5 @@ namespace PlaytestingReviewer.Video
         /// Get the current frame of the video
         /// </summary>
         int GetCurrentFrame();
-
-        Texture2D GetTextureInTime(float time);
     }
 }
