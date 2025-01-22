@@ -1,4 +1,5 @@
 using System;
+using Codice.CM.Common;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace PlaytestingReviewer.Editor
 {
-    public class Track
+    public abstract class Track
     {
         protected VisualElement _infoRoot;
         protected VisualElement _descriptionRoot;
@@ -14,19 +15,26 @@ namespace PlaytestingReviewer.Editor
         protected VisualElement _descriptionContainer;
         protected VisualElement _informationContainer;
 
+        protected IProvideTimeRelations _timeRelations;
+
+        protected float _trackHeight = 40;
+
         /// <summary>
         /// Constructor for the track class
         /// </summary>
         /// <param name="description"> where you want the label and what the track does</param>
         /// <param name="information">where you want the information to be visualized</param>
-        public Track(VisualElement description, VisualElement information)
+        public Track(VisualElement description, VisualElement information, IProvideTimeRelations timeRelations)
         {
-            _infoRoot = information;
+            PreInitialization();
+
             _descriptionRoot = description;
+            _infoRoot = information;
 
             InitializeDescription(description);
             InitializeInformation(information);
         }
+        protected abstract void PreInitialization();
 
         protected virtual void InitializeInformation(VisualElement information)
         {
@@ -34,11 +42,14 @@ namespace PlaytestingReviewer.Editor
             _informationContainer.style.backgroundColor = new StyleColor(Color.gray);
             _informationContainer.style.flexDirection = FlexDirection.Row;
             _informationContainer.style.alignItems = Align.Center;
-            _informationContainer.style.height = 40;
+            _informationContainer.style.height = _trackHeight;
             _informationContainer.style.marginBottom = 5;
             _informationContainer.style.marginTop = 5;
 
             information.Add(_informationContainer);
+
+            _informationContainer.RegisterCallback<GeometryChangedEvent>(evt => OnResize(_informationContainer));
+
         }
 
         protected virtual void InitializeDescription(VisualElement description)
@@ -49,7 +60,7 @@ namespace PlaytestingReviewer.Editor
             _descriptionContainer.style.backgroundColor = new StyleColor(Color.gray);
             _descriptionContainer.style.flexDirection = FlexDirection.Row;
             _descriptionContainer.style.alignItems = Align.Center;
-            _descriptionContainer.style.height = 40;
+            _descriptionContainer.style.height = _trackHeight;
             _descriptionContainer.style.marginBottom = 5;
             _descriptionContainer.style.marginTop = 5;
 
@@ -78,7 +89,6 @@ namespace PlaytestingReviewer.Editor
             labelContainer.Add(label);
             _descriptionContainer.Add(labelContainer);
 
-            // Create button
             var button = new Button() { text = ":" };
             button.clicked += OnButtonClicked;
             _descriptionContainer.Add(button);
@@ -91,10 +101,14 @@ namespace PlaytestingReviewer.Editor
             var menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete Track"), false, DeleteTrack);
             menu.AddItem(new GUIContent("ToggleVisibility"), false, ToggleVisibility);
+            AddMenuItems(menu);
             menu.ShowAsContext();
         }
 
-        private void ToggleVisibility()
+        protected virtual void AddMenuItems(GenericMenu menu) { } //defult implementation
+        protected virtual void OnResize(VisualElement informationZone) { }
+
+        protected void ToggleVisibility()
         {
             if (_informationContainer == null)
             {
@@ -108,7 +122,7 @@ namespace PlaytestingReviewer.Editor
             }
         }
 
-        private void DeleteTrack()
+        protected void DeleteTrack()
         {
             _descriptionContainer.RemoveFromHierarchy();
             _informationContainer.RemoveFromHierarchy();

@@ -1,14 +1,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
-using UnityEditor;
 using PlaytestingReviewer.Video;
-using Unity.VisualScripting;
-using System;
 
 namespace PlaytestingReviewer.Editor
 {
-    public class TimeIndicatorController
+    public class TimeIndicatorController : IProvideTimeRelations
     {
         private const int InitialSpaceBetweenIndicators = 13;
         private const float LabelSize = 20f;
@@ -116,7 +113,7 @@ namespace PlaytestingReviewer.Editor
             return _timeIndicators[0].resolvedStyle.marginLeft;
         }
 
-        public float GetWorldPositionOfTime(float time)
+        public float GetLeftWorldPositionOfTime(float time)
         {
             if (_timeIndicators == null) { return 0; }
             float initialLabel = _timeIndicators[0].worldBound.x;
@@ -126,6 +123,14 @@ namespace PlaytestingReviewer.Editor
             float videoLength = _videoLength;
             return Mathf.Lerp(initialLabel, lastLabel, time / videoLength);
         }
+
+        public float GetTimeFromLeftWorldPosition(float x)
+        {
+            float initialLabel = _timeIndicators[0].worldBound.x;
+            float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
+            float videoLength = _videoLength;
+            return Mathf.Lerp(0, videoLength, (x - initialLabel) / (lastLabel - initialLabel));
+        } 
         private void OnMouseDown(MouseDownEvent evt)
         {
             if (evt.button == 0)
@@ -137,7 +142,7 @@ namespace PlaytestingReviewer.Editor
             }
         }
 
-        private float GetTimeFromWorldPosition(float x)
+        public float GetTimeFromWorldPosition(float x)
         {
             float initialLabel = _timeIndicators[0].worldBound.x;
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;

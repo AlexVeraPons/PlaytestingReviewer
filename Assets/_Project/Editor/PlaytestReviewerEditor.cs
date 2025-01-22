@@ -62,7 +62,7 @@ namespace PlaytestingReviewer.Editor
             var trackDescription = rootVisualElement.Q<VisualElement>("TrackDescriptions");
             var trackInformation = rootVisualElement.Q<VisualElement>("TrackInformation");
 
-            var track = new Track(trackDescription,trackInformation);
+            var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
         }
     }
 }

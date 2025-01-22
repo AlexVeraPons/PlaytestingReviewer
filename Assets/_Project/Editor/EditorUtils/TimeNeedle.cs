@@ -26,7 +26,7 @@ namespace PlaytestingReviewer.Editor
         {
             if (_videoPlayer == null || _timeNeedle == null) { return; }
 
-            float position = _timeIndicatorController.GetWorldPositionOfTime(_videoPlayer.GetCurrentTime());
+            float position = _timeIndicatorController.GetLeftWorldPositionOfTime(_videoPlayer.GetCurrentTime());
             //set the world position of the needle
             VisualElement TrackView = _root.Q<VisualElement>("TrackView");
 

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace PlaytestingReviewer.Video
 {
     public interface IVideoPlayer
@@ -70,5 +72,7 @@ namespace PlaytestingReviewer.Video
         /// Get the current frame of the video
         /// </summary>
         int GetCurrentFrame();
+
+        Texture2D GetTextureInTime(float time);
     }
 }
