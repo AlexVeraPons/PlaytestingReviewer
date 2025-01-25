@@ -12,5 +12,6 @@ namespace PlaytestingReviewer
         public static string FrameOutputPath =>  Application.streamingAssetsPath + "/Frames";
         public static string PlaytestReviewerUXMLPath => "Assets/_Project/Editor/PlaytestReviewer.uxml";
         public static string PlaytestReviewerUSSPath => "Assets/_Project/Editor/PlaytestReviewer.uss";
+        public static string VideoPreviewIcon => "Assets/_Project/Icons/VideoPreviewIcon.png";
     }
 }

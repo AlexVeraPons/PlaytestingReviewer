@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,6 +9,7 @@ namespace PlaytestingReviewer.Editor
     public class PlaytestReviewerEditor : EditorWindow
     {
         private string _ussPath = PathManager.PlaytestReviewerUSSPath;
+        private string _iconPath = PathManager.VideoPreviewIcon;
         public VisualTreeAsset visualTree;
         public Texture2D scriptableObjectIcon;
 
@@ -65,11 +67,18 @@ namespace PlaytestingReviewer.Editor
 
             var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
             track.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
-            var timeView = rootVisualElement.Q<ScrollView>("TimeView");
-            timeView.horizontalScroller.valueChanged += (value) =>
+            Texture2D _previewTrackIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(_iconPath);
+            if (_previewTrackIcon == null)
             {
-                trackInformation.horizontalScroller.value = value;
-            };
+                Debug.LogError($"Failed to load icon at path: {_iconPath}");
+                return;
+            }
+            track.SetTrackIcon(_previewTrackIcon);
+            var timeView = rootVisualElement.Q<ScrollView>("TimeScroll");
+
+            // Synchronize horizontal scroll values
+            trackInformation.horizontalScroller.valueChanged += (value) => timeView.horizontalScroller.value = value;
+            timeView.horizontalScroller.valueChanged += (value) => trackInformation.horizontalScroller.value = value;
         }
     }
 }

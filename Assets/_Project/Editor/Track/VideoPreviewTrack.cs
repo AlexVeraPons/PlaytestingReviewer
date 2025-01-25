@@ -14,7 +14,7 @@ namespace PlaytestingReviewer.Editor
 
         private const int pixelHeight = 55;
         private const int pixelWidth = 80;
-        private readonly List<Image> _previews;
+        private readonly List<Image> _previews = new List<Image>();
 
         private bool _inNeedOfImages = false;
         private bool _isRefreshing = false; // Prevents multiple simultaneous updates
@@ -31,29 +31,27 @@ namespace PlaytestingReviewer.Editor
             : base(description, information, timeRelations)
         {
             _videoPlayer = videoPlayer;
-            _previews = new List<Image>();
             _timeRelations = timeRelations;
-
-            OnResize += Resized;
-
-            _resizeDebounceDuration = 2f;
         }
 
-        protected override void PreInitialization()
+        protected override void Initialization(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
         {
-            // Adjust track height as needed
             _trackHeight = 60;
+            _title = "VideoPreview";
+            base.Initialization(description, information, timeRelations);
+            OnResize += Resized;
+            _resizeDebounceDuration = 2f;
+
         }
+
 
         protected void Resized()
         {
             int amountOfPreviews = (int)_informationContainer.resolvedStyle.width / pixelWidth;
 
-            // Clear existing previews
             _informationContainer.Clear();
             _previews.Clear();
 
-            // Create new preview boxes
             for (int i = 0; i < amountOfPreviews; i++)
             {
                 var previewBox = new Image
@@ -70,7 +68,6 @@ namespace PlaytestingReviewer.Editor
                 _previews.Add(previewBox);
             }
 
-            // Mark that we need new images
             _inNeedOfImages = true;
         }
 

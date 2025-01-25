@@ -8,6 +8,8 @@ namespace PlaytestingReviewer.Editor
 {
     public abstract class Track
     {
+        private Image _trackIcon;
+
         protected Action OnResize;
 
         protected VisualElement _infoRoot;
@@ -25,6 +27,9 @@ namespace PlaytestingReviewer.Editor
         private bool _shouldStartResizeTimer = false;
         protected VisualElement _elementToAdaptToWidth;
 
+        private VisualElement _imageContainer;
+
+        protected string _title = "Description";
 
         /// <summary>
         /// Constructor for the track class
@@ -33,8 +38,12 @@ namespace PlaytestingReviewer.Editor
         /// <param name="information">Where you want the information to be visualized</param>
         public Track(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
         {
+            Initialization(description, information, timeRelations);
+        }
+
+        protected virtual void Initialization(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
+        {
             _timeRelations = timeRelations;
-            PreInitialization();
 
             _descriptionRoot = description;
             _infoRoot = information;
@@ -60,52 +69,63 @@ namespace PlaytestingReviewer.Editor
             }
         }
 
-        protected abstract void PreInitialization();
-
         protected virtual void InitializeInformation(VisualElement information)
         {
-            _informationContainer = new VisualElement();
+            _informationContainer = new VisualElement
+            {
+                style =
+                {
+                    // Background color
+                    backgroundColor = new StyleColor(new Color(0.20f, 0.20f, 0.20f)),
 
-            // Background color, border, and rounding
-            _informationContainer.style.backgroundColor = new StyleColor(new Color(0.25f, 0.25f, 0.25f));
-            _informationContainer.style.borderTopWidth = 1;
-            _informationContainer.style.borderBottomWidth = 1;
-            _informationContainer.style.borderLeftWidth = 1;
-            _informationContainer.style.borderRightWidth = 1;
-            _informationContainer.style.borderTopColor = new StyleColor(Color.black);
-            _informationContainer.style.borderBottomColor = new StyleColor(Color.black);
-            _informationContainer.style.borderLeftColor = new StyleColor(Color.black);
-            _informationContainer.style.borderRightColor = new StyleColor(Color.black);
-            _informationContainer.style.borderTopLeftRadius = 3;
-            _informationContainer.style.borderTopRightRadius = 6;
-            _informationContainer.style.borderBottomLeftRadius = 3;
-            _informationContainer.style.borderBottomRightRadius = 6;
+                    // Borders
+                    borderTopWidth = 1,
+                    borderBottomWidth = 1,
+                    borderLeftWidth = 1,
+                    borderRightWidth = 1,
+                    borderTopColor = new StyleColor(Color.black),
+                    borderBottomColor = new StyleColor(Color.black),
+                    borderLeftColor = new StyleColor(Color.black),
+                    borderRightColor = new StyleColor(Color.black),
 
-            _informationContainer.style.flexDirection = FlexDirection.Row;
-            _informationContainer.style.alignItems = Align.Center;
-            _informationContainer.style.height = _trackHeight;
-            _informationContainer.style.marginBottom = 5;
-            _informationContainer.style.marginTop = 5;
-            _informationContainer.style.paddingLeft = 10;
-            _informationContainer.style.paddingRight = 10;
+                    // Rounding
+                    borderTopLeftRadius = 6,
+                    borderTopRightRadius = 6,
+                    borderBottomLeftRadius = 6,
+                    borderBottomRightRadius = 6,
+
+                    // Layout
+                    flexDirection = FlexDirection.Row,
+                    alignItems = Align.Center,
+                    height = _trackHeight,
+                    marginBottom = 5,
+                    marginTop = 5,
+                    paddingLeft = 10,
+                    paddingRight = 10
+                }
+            };
 
             information.Add(_informationContainer);
         }
 
         protected virtual void InitializeDescription(VisualElement description)
         {
+            // Main container for the description
             _descriptionContainer = new VisualElement
             {
                 style =
                 {
-                    maxWidth = 200,
                     flexDirection = FlexDirection.Row,
                     alignItems = Align.Center,
                     height = _trackHeight,
                     marginBottom = 5,
                     marginTop = 5,
+
+                    // This background will be mostly overshadowed by child elements, 
+                    // but let's keep it slightly darker to match the overall style
                     backgroundColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f)),
 
+                    // Borders (unified for a consistent look)
                     borderTopWidth = 1,
                     borderBottomWidth = 1,
                     borderLeftWidth = 1,
@@ -118,49 +138,53 @@ namespace PlaytestingReviewer.Editor
                     borderTopRightRadius = 6,
                     borderBottomLeftRadius = 6,
                     borderBottomRightRadius = 6,
-                    
+
                     // Some horizontal padding
                     paddingLeft = 5,
-                    paddingRight = 5
+                    paddingRight = 5,
                 }
             };
 
+            // Pastel bar on the left side
+            var pastelBar = new VisualElement
+            {
+                style =
+                {
+                    width = 8,
+                    height = new Length(100, LengthUnit.Percent),
+                    backgroundColor = new StyleColor(new Color(0.90f, 0.90f, 1f)),
+                    marginLeft = -5f,
+                    borderBottomLeftRadius = 6,
+                    borderTopLeftRadius = 6
+                }
+            };
+            _descriptionContainer.Add(pastelBar);
+
+            // We can keep a small spacer if we like
             var spacerElement = new VisualElement
             {
                 style =
                 {
-                    width = 10,
+                    width = 5,
                     height = 20
                 }
             };
             _descriptionContainer.Add(spacerElement);
 
-            var squareElement = new VisualElement
+            // Square or “icon” element
+            _imageContainer = new VisualElement
             {
                 style =
                 {
                     width = 20,
                     height = 20,
-                    backgroundColor = new StyleColor(Color.black),
-                    borderTopWidth = 1,
-                    borderBottomWidth = 1,
-                    borderLeftWidth = 1,
-                    borderRightWidth = 1,
-                    borderTopColor = new StyleColor(Color.white),
-                    borderBottomColor = new StyleColor(Color.white),
-                    borderLeftColor = new StyleColor(Color.white),
-                    borderRightColor = new StyleColor(Color.white),
-                    borderTopLeftRadius = 2,
-                    borderTopRightRadius = 2,
-                    borderBottomLeftRadius = 2,
-                    borderBottomRightRadius = 2,
-                    marginLeft = 5,
-                    marginRight = 5
+                    marginLeft = 10,
+                    marginRight = 10
                 }
             };
-            _descriptionContainer.Add(squareElement);
+            _descriptionContainer.Add(_imageContainer);
 
-            // Create a label container with a bit of internal padding
+            // Label container
             var labelContainer = new VisualElement
             {
                 style =
@@ -170,18 +194,26 @@ namespace PlaytestingReviewer.Editor
                     paddingBottom = 5,
                     paddingLeft = 10,
                     paddingRight = 10,
-                    
-                    // Adding a slight rounding to match outer container
+
+                    // Smoother rounding
                     borderTopLeftRadius = 4,
                     borderTopRightRadius = 4,
                     borderBottomLeftRadius = 4,
-                    borderBottomRightRadius = 4
+                    borderBottomRightRadius = 4,
+
+                    borderTopWidth = 1,
+                    borderBottomWidth = 1,
+                    borderLeftWidth = 1,
+                    borderRightWidth = 1,
+                    borderTopColor = new StyleColor(Color.black),
+                    borderBottomColor = new StyleColor(Color.black),
+                    borderLeftColor = new StyleColor(Color.black),
+                    borderRightColor = new StyleColor(Color.black)
                 }
             };
 
-            var label = new Label("Description")
+            var label = new Label(_title)
             {
-                // Center the label text vertically
                 style =
                 {
                     unityTextAlign = TextAnchor.MiddleCenter,
@@ -192,13 +224,13 @@ namespace PlaytestingReviewer.Editor
             labelContainer.Add(label);
             _descriptionContainer.Add(labelContainer);
 
-            // Add a button for the context menu
+            // Button for context menu
             var button = new Button() { text = ":" };
             button.clicked += OnButtonClicked;
             button.style.marginLeft = 10;
             _descriptionContainer.Add(button);
 
-            // Add our container to the parent
+            // Finally, add the container to the parent
             description.Add(_descriptionContainer);
         }
 
@@ -248,7 +280,15 @@ namespace PlaytestingReviewer.Editor
             _shouldStartResizeTimer = true;
             _resizeDebounceTimer = _resizeDebounceDuration;
 
-            _informationContainer.style.width = _elementToAdaptToWidth.resolvedStyle.width;
+            if (_informationContainer != null && _elementToAdaptToWidth != null)
+            {
+                _informationContainer.style.width = _elementToAdaptToWidth.resolvedStyle.width;
+            }
+        }
+
+        public void SetTrackIcon(Texture2D image)
+        {
+            _imageContainer.style.backgroundImage = image;
         }
     }
 }
