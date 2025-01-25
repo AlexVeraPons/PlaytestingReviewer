@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.XR;
 
 namespace PlaytestingReviewer.Editor
 {
@@ -60,9 +61,15 @@ namespace PlaytestingReviewer.Editor
 
 
             var trackDescription = rootVisualElement.Q<VisualElement>("TrackDescriptions");
-            var trackInformation = rootVisualElement.Q<VisualElement>("TrackInformation");
+            var trackInformation = rootVisualElement.Q<ScrollView>("TrackInformation");
 
             var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
+            track.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
+            var timeView = rootVisualElement.Q<ScrollView>("TimeView");
+            timeView.horizontalScroller.valueChanged += (value) =>
+            {
+                trackInformation.horizontalScroller.value = value;
+            };
         }
     }
 }

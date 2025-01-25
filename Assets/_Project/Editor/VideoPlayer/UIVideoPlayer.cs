@@ -162,6 +162,7 @@ namespace PlaytestingReviewer.Video
 
         private void OnDetachFromPanel(DetachFromPanelEvent evt)
         {
+            
             EditorApplication.update -= UpdateVideoFrame;
             if (_renderTexture != null)
             {
@@ -226,6 +227,11 @@ namespace PlaytestingReviewer.Video
             {
                 _videoPlayer.frame = frame;
             }
+        }
+
+        public string GetVideoPath()
+        {
+            return _videoPlayer.url;
         }
     }
 }

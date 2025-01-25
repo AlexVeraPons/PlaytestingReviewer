@@ -5,7 +5,7 @@ using PlaytestingReviewer.Video;
 
 namespace PlaytestingReviewer.Editor
 {
-    public class TimeIndicatorController : IProvideTimeRelations
+    public class TimeIndicatorController : ITimePositionTranslator
     {
         private const int InitialSpaceBetweenIndicators = 13;
         private const float LabelSize = 20f;
@@ -129,8 +129,14 @@ namespace PlaytestingReviewer.Editor
             float initialLabel = _timeIndicators[0].worldBound.x;
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
             float videoLength = _videoLength;
-            return Mathf.Lerp(0, videoLength, x / (lastLabel - initialLabel));
-        } 
+
+            // Calculate the normalized position of x between initialLabel and lastLabel
+            float normalizedPosition = (x - initialLabel) / (lastLabel - initialLabel);
+
+            // Map the normalized position to the video length
+            return Mathf.Lerp(0, videoLength, normalizedPosition);
+        }
+
         private void OnMouseDown(MouseDownEvent evt)
         {
             if (evt.button == 0)
@@ -152,9 +158,9 @@ namespace PlaytestingReviewer.Editor
 
         public bool SetupComplete()
         {
-            if(_timeIndicators == null || _timeIndicators.Count == 0) {return false;}
+            if (_timeIndicators == null || _timeIndicators.Count == 0) { return false; }
 
-            if(_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) {return false;}
+            if (_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) { return false; }
 
             return true;
         }

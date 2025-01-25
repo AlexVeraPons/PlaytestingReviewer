@@ -1,6 +1,6 @@
 namespace PlaytestingReviewer.Editor
 {
-    public interface IProvideTimeRelations
+    public interface ITimePositionTranslator
     {
         public float GetTimeFromWorldPosition(float x);
 

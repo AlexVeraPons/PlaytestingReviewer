@@ -8,6 +8,7 @@ namespace PlaytestingReviewer.Video
 {
     public class VideoCapture : MonoBehaviour
     {
+        
         [Header("Camera & Capture Settings")]
         public Camera captureCamera;  
         private Camera mainCamera;    
