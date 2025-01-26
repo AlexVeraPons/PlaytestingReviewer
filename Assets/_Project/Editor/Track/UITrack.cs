@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace PlaytestingReviewer.Editor
 {
-    public abstract class Track
+    public abstract class UITrack
     {
         private Image _trackIcon;
 
@@ -36,7 +36,7 @@ namespace PlaytestingReviewer.Editor
         /// </summary>
         /// <param name="description">Where you want the label and what the track does</param>
         /// <param name="information">Where you want the information to be visualized</param>
-        public Track(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
+        public UITrack(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
         {
             Initialization(description, information, timeRelations);
         }

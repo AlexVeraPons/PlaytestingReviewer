@@ -1,0 +1,411 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "Mouse.png",
+            "name": "Mouse Input Track",
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.489295"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:601.9999, y:464.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.64367"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:619, y:470.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.78474"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:775, y:393.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.033885"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1703, y:404.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.200259"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1683, y:465.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.606697"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:298.9999, y:654.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.729204"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:294.9999, y:638, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.867524"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:321.9999, y:606.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.277445"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1486, y:425, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.381382"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1350, y:435.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.537957"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1059, y:584.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.594593"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:975, y:566, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.732927"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:860.0001, y:558.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.746741"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:847, y:542.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.92013"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:794.0001, y:441.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.949806"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:784, y:392, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.408903"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:766.9999, y:194, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.642571"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:590.9999, y:249.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.679751"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:557.9999, y:287.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.829922"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:590.9999, y:393.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.970155"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:783, y:405.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.032492"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:802, y:375.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.203014"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1211, y:279.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.37983"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Right"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1258, y:299.9999, z:0"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.469386"
+                        },
+                        {
+                            "key": "button",
+                            "value": "Left"
+                        },
+                        {
+                            "key": "position",
+                            "value": "x:1255, y:303.9999, z:0"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

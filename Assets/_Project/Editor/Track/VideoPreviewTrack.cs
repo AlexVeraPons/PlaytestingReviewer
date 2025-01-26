@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PlaytestingReviewer.Editor
 {
-    public class VideoPreviewTrack : Track
+    public class VideoPreviewTrack : UITrack
     {
         private IVideoPlayer _videoPlayer;
 
