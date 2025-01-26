@@ -164,6 +164,11 @@ namespace PlaytestingReviewer.Editor
 
             return true;
         }
+
+        public float GetTotalTime()
+        {
+            return _videoLength;
+        }
     }
 }
 

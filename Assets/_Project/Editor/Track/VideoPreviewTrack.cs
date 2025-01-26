@@ -17,7 +17,7 @@ namespace PlaytestingReviewer.Editor
         private readonly List<Image> _previews = new List<Image>();
 
         private bool _inNeedOfImages = false;
-        private bool _isRefreshing = false; // Prevents multiple simultaneous updates
+        private bool _isRefreshing = false; 
 
         private bool _awaitingRefresh = false;
         private float _timeSinceLastRequest = 0f;
@@ -75,19 +75,14 @@ namespace PlaytestingReviewer.Editor
         {
             base.TrackUpdate();
 
-            // If we need a refresh and the video & time setup are valid, queue a refresh.
             if (_inNeedOfImages && _timeRelations.SetupComplete() && !_isRefreshing)
             {
-                // Reset for a delayed refresh
                 _awaitingRefresh = true;
                 _timeSinceLastRequest = 0f;
                 
-                // We don't want to repeatedly trigger 
-                // the "inNeed" flag until the refresh actually happens.
                 _inNeedOfImages = false;
             }
 
-            // If a refresh is queued, count up until we hit the half-second mark.
             if (_awaitingRefresh)
             {
                 _timeSinceLastRequest += Time.deltaTime;

@@ -7,5 +7,6 @@ namespace PlaytestingReviewer.Editor
         public float GetTimeFromLeftWorldPosition(float x);
 
         public bool SetupComplete();
+        public float GetTotalTime();
     }
 }

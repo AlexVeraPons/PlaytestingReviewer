@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
+using PlaytestingReviewer.Tracks;
 
 namespace PlaytestingReviewer.Editor
 {
@@ -65,20 +66,25 @@ namespace PlaytestingReviewer.Editor
             var trackDescription = rootVisualElement.Q<VisualElement>("TrackDescriptions");
             var trackInformation = rootVisualElement.Q<ScrollView>("TrackInformation");
 
-            var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
-            track.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
+            // var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
+            // track.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
             Texture2D _previewTrackIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(_iconPath);
-            if (_previewTrackIcon == null)
-            {
-                Debug.LogError($"Failed to load icon at path: {_iconPath}");
-                return;
-            }
-            track.SetTrackIcon(_previewTrackIcon);
+            // if (_previewTrackIcon == null)
+            // {
+            //     Debug.LogError($"Failed to load icon at path: {_iconPath}");
+            //     return;
+            // }
+            // track.SetTrackIcon(_previewTrackIcon);
+            TrackCollection tracks = TrackConverter.JsonToTracks(PathManager.VideoOutputPath + "/Mouse.json");
+            MetricTrack metricTrack = new MetricTrack(trackDescription,trackInformation,_timeIndicatorController,tracks.tracks[0]);
+            metricTrack.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
+            metricTrack.SetTrackIcon(_previewTrackIcon);
             var timeView = rootVisualElement.Q<ScrollView>("TimeScroll");
 
             // Synchronize horizontal scroll values
             trackInformation.horizontalScroller.valueChanged += (value) => timeView.horizontalScroller.value = value;
             timeView.horizontalScroller.valueChanged += (value) => trackInformation.horizontalScroller.value = value;
+
         }
     }
 }

@@ -8,8 +8,6 @@ namespace PlaytestingReviewer.Editor
 {
     public abstract class UITrack
     {
-        private Image _trackIcon;
-
         protected Action OnResize;
 
         protected VisualElement _infoRoot;
@@ -22,7 +20,7 @@ namespace PlaytestingReviewer.Editor
 
         protected float _trackHeight = 40;
 
-        private float _resizeDebounceTimer;
+        private float _resizeDebounceTimer = 0f;
         protected float _resizeDebounceDuration = 1f;
         private bool _shouldStartResizeTimer = false;
         protected VisualElement _elementToAdaptToWidth;
