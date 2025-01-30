@@ -73,5 +73,6 @@ namespace PlaytestingReviewer.Video
         /// </summary>
         int GetCurrentFrame();
         string GetVideoPath();
+        void SetVideo(string path);
     }
 }

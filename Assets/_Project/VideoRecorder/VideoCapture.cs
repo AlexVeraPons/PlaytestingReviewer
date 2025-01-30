@@ -1,14 +1,15 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
+using UnityEngine.Events;
 using Debug = UnityEngine.Debug;
 
 namespace PlaytestingReviewer.Video
 {
     public class VideoCapture : MonoBehaviour
     {
-        
         [Header("Camera & Capture Settings")]
         public Camera captureCamera;  
         private Camera mainCamera;    

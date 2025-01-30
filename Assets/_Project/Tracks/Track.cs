@@ -86,6 +86,19 @@ namespace PlaytestingReviewer.Tracks
     public class TrackCollection
     {
         public Track[] tracks;
+        public TrackCollection() {}
+        public TrackCollection(string pathToJson)
+        {
+            TrackCollection trackCollection = TrackConverter.JsonToTracks(pathToJson);
+            if (trackCollection != null)
+            {
+                tracks = trackCollection.tracks;
+            }
+            else
+            {
+                tracks = new Track[0];
+            }
+        }
     }
 
     public enum TrackType

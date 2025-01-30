@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public class ZoomUpdater
     {

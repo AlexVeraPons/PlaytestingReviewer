@@ -5,7 +5,7 @@ using UnityEditor;
 using static Codice.Client.BaseCommands.KnownCommandOptions;
 using UnityEngine.Video;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public class VideoController
     {
@@ -20,11 +20,9 @@ namespace PlaytestingReviewer.Editor
         private bool _isPlaying = false;
         private float _videoLength = 0f;
 
-
         public VideoController(VisualElement root)
         {
             SetUpVideoControls(root);
-
             EditorApplication.update += Update;
         }
 
@@ -82,5 +80,9 @@ namespace PlaytestingReviewer.Editor
             _videoPlayer.SetFrame(frame);
         }
 
+        public void SetVideo(string path)
+        {
+            _videoPlayer.SetVideo(path);
+        }
     }
 }

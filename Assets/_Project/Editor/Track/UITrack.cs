@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public abstract class UITrack
     {
@@ -28,6 +28,7 @@ namespace PlaytestingReviewer.Editor
         private VisualElement _imageContainer;
 
         protected string _title = "Description";
+        protected Label _descriptionLabel;
 
         /// <summary>
         /// Constructor for the track class
@@ -51,7 +52,6 @@ namespace PlaytestingReviewer.Editor
 
             EditorApplication.update += TrackUpdate;
         }
-
         protected virtual void TrackUpdate()
         {
             if (_shouldStartResizeTimer == true)
@@ -119,8 +119,6 @@ namespace PlaytestingReviewer.Editor
                     marginBottom = 5,
                     marginTop = 5,
 
-                    // This background will be mostly overshadowed by child elements, 
-                    // but let's keep it slightly darker to match the overall style
                     backgroundColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f)),
 
                     // Borders (unified for a consistent look)
@@ -210,7 +208,7 @@ namespace PlaytestingReviewer.Editor
                 }
             };
 
-            var label = new Label(_title)
+            _descriptionLabel = new Label(_title)
             {
                 style =
                 {
@@ -218,8 +216,8 @@ namespace PlaytestingReviewer.Editor
                     fontSize = 14
                 }
             };
-
-            labelContainer.Add(label);
+            
+            labelContainer.Add(_descriptionLabel);
             _descriptionContainer.Add(labelContainer);
 
             // Button for context menu
@@ -269,12 +267,11 @@ namespace PlaytestingReviewer.Editor
         public void AdaptToWidth(VisualElement element)
         {
             _elementToAdaptToWidth = element;
-            element.RegisterCallback<GeometryChangedEvent>(evt => ElementResized());
+            element.RegisterCallback<GeometryChangedEvent>(_ => ElementResized());
         }
 
-        private void ElementResized()
+        protected virtual void ElementResized()
         {
-            Debug.Log("Element resized");
             _shouldStartResizeTimer = true;
             _resizeDebounceTimer = _resizeDebounceDuration;
 

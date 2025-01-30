@@ -13,7 +13,7 @@ namespace PlaytestingReviewer.Tracks
             MouseTrack = new Track
             {
                 type = TrackType.Metric,
-                iconName = "Mouse.png",
+                iconName = "DefaultIcon.png",
                 name = "Mouse Input Track",
                 instances = new List<SerializableDictionary>()
             };

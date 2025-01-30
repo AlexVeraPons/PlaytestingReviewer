@@ -1,16 +1,15 @@
-using Unity.VisualScripting;
+using PlaytestingReviewer.Tracks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.XR;
-using PlaytestingReviewer.Tracks;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public class PlaytestReviewerEditor : EditorWindow
     {
-        private string _ussPath = PathManager.PlaytestReviewerUSSPath;
-        private string _iconPath = PathManager.VideoPreviewIcon;
+        private readonly string _ussPath = PathManager.PlaytestReviewerUSSPath;
+        private readonly string _iconPath = PathManager.VideoPreviewIcon;
+
         public VisualTreeAsset visualTree;
         public Texture2D scriptableObjectIcon;
 
@@ -18,11 +17,12 @@ namespace PlaytestingReviewer.Editor
         private TimeIndicatorController _timeIndicatorController;
         private TimeNeedle _timeNeedle;
         private ZoomUpdater _zoomUpdater;
+        private TracksButton _tracksButton;
 
-        [MenuItem("Tools/PlaytestReviewerEditor")]
+        [MenuItem("Tools/Playtest Reviewer")]
         public static void ShowEditorWindow()
         {
-            PlaytestReviewerEditor window = GetWindow<PlaytestReviewerEditor>();
+            var window = GetWindow<PlaytestReviewerEditor>();
             window.titleContent = new GUIContent("Playtest Reviewer");
         }
 
@@ -35,13 +35,13 @@ namespace PlaytestingReviewer.Editor
 
         private void InitializeUI()
         {
-            VisualElement root = visualTree.CloneTree();
+            var root = visualTree.CloneTree();
             rootVisualElement.Add(root);
         }
 
         private void LoadStyleSheet()
         {
-            StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(_ussPath);
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(_ussPath);
             if (styleSheet == null)
             {
                 Debug.LogError($"Failed to load USS at path: {_ussPath}");
@@ -55,36 +55,52 @@ namespace PlaytestingReviewer.Editor
             _zoomUpdater = new ZoomUpdater();
             _zoomUpdater.SubscribeToZoom(rootVisualElement);
 
-
             _videoController = new VideoController(rootVisualElement);
             _timeIndicatorController = new TimeIndicatorController(rootVisualElement, _videoController.VideoPlayer, _zoomUpdater);
-            _videoController.OnNewVideoLengthAvailable += _timeIndicatorController.ReloadIndicators;
             _timeNeedle = new TimeNeedle(rootVisualElement, _timeIndicatorController, _videoController.VideoPlayer);
+
+            _videoController.OnNewVideoLengthAvailable += _timeIndicatorController.ReloadIndicators;
             _videoController.OnPlay += _timeNeedle.Initialize;
 
+            InitializeTracks();
+        }
 
+        private void InitializeTracks()
+        {
             var trackDescription = rootVisualElement.Q<VisualElement>("TrackDescriptions");
             var trackInformation = rootVisualElement.Q<ScrollView>("TrackInformation");
-
-            // var track = new VideoPreviewTrack(trackDescription,trackInformation,_timeIndicatorController,_videoController.VideoPlayer);
-            // track.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
-            Texture2D _previewTrackIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(_iconPath);
-            // if (_previewTrackIcon == null)
-            // {
-            //     Debug.LogError($"Failed to load icon at path: {_iconPath}");
-            //     return;
-            // }
-            // track.SetTrackIcon(_previewTrackIcon);
-            TrackCollection tracks = TrackConverter.JsonToTracks(PathManager.VideoOutputPath + "/Mouse.json");
-            MetricTrack metricTrack = new MetricTrack(trackDescription,trackInformation,_timeIndicatorController,tracks.tracks[0]);
-            metricTrack.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
-            metricTrack.SetTrackIcon(_previewTrackIcon);
             var timeView = rootVisualElement.Q<ScrollView>("TimeScroll");
 
-            // Synchronize horizontal scroll values
-            trackInformation.horizontalScroller.valueChanged += (value) => timeView.horizontalScroller.value = value;
-            timeView.horizontalScroller.valueChanged += (value) => trackInformation.horizontalScroller.value = value;
+            _tracksButton = new TracksButton(rootVisualElement.Q<Button>("AddTracksButton"), trackDescription, trackInformation, _timeIndicatorController,rootVisualElement.Q<VisualElement>("TimeView"));
 
+            var previewTrackIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(_iconPath);
+            var videoPreview = new VideoPreviewTrack(trackDescription, trackInformation, _timeIndicatorController, _videoController.VideoPlayer);
+            videoPreview.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
+            videoPreview.SetTrackIcon(previewTrackIcon);
+
+            // Synchronize horizontal scrolling
+            trackInformation.horizontalScroller.valueChanged += value => timeView.horizontalScroller.value = value;
+            timeView.horizontalScroller.valueChanged += value => trackInformation.horizontalScroller.value = value;
+        }
+
+        public void OpenWindow(Review review)
+        {
+            ShowEditorWindow();
+            PopulateTracks(review.GetTrackCollecion());
+            InitializeVideo(review.videoPath);
+
+            Label name = rootVisualElement.Q<Label>("RecordingName");
+            name.text = review.name;
+        }
+
+        private void InitializeVideo(string path)
+        {
+            _videoController.SetVideo(path);
+        }
+
+        private void PopulateTracks(TrackCollection collection)
+        {
+            _tracksButton.SetTrackCollection(collection);
         }
     }
 }

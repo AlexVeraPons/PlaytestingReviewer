@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Threading.Tasks;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public class VideoPreviewTrack : UITrack
     {

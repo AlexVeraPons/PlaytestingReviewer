@@ -1,4 +1,4 @@
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public interface ITimePositionTranslator
     {

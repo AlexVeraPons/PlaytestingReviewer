@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using PlaytestingReviewer.Video;
 
-namespace PlaytestingReviewer.Editor
+namespace PlaytestingReviewer.Editors
 {
     public class TimeIndicatorController : ITimePositionTranslator
     {

@@ -11,9 +11,8 @@ namespace PlaytestingReviewer.Video
     public partial class UIVideoPlayer : VisualElement, IVideoPlayer
     {
         private string _defaultImagePath = PathManager.DefaultImagePath;
-        private string _defaultVideoPath = PathManager.DefaultVideoPath;
+        private string _imageVideoLoadedPath = PathManager.ImageVideoLoadedPath;
 
-        private VisualElement _buttonsContainer;
         private VisualElement _videoContainer;
         private Image _videoRenderer;
         private UnityEngine.Video.VideoPlayer _videoPlayer;
@@ -63,14 +62,19 @@ namespace PlaytestingReviewer.Video
             _renderTexture = new RenderTexture(1920, 1080, 0);
             _videoPlayer.targetTexture = _renderTexture;
 
-            _videoPlayer.url = _defaultVideoPath;
-
             EditorApplication.update += UpdateVideoFrame;
+        }
 
+        public void SetVideo(string path)
+        {
+            _videoPlayer.url = path;
+            _videoRenderer.image = AssetDatabase.LoadAssetAtPath<Texture2D>(_imageVideoLoadedPath);
         }
 
         public void Play()
-        {
+        {   
+            if(_videoPlayer.url == "") {return;}
+
             if (_videoPlayer != null && !_videoPlayer.isPlaying)
             {
                 _videoPlayer.Play();
@@ -162,7 +166,6 @@ namespace PlaytestingReviewer.Video
 
         private void OnDetachFromPanel(DetachFromPanelEvent evt)
         {
-            
             EditorApplication.update -= UpdateVideoFrame;
             if (_renderTexture != null)
             {
