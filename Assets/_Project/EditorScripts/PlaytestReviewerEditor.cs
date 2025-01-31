@@ -41,13 +41,13 @@ namespace PlaytestingReviewer.Editors
 
         private void LoadStyleSheet()
         {
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(_ussPath);
-            if (styleSheet == null)
-            {
-                Debug.LogError($"Failed to load USS at path: {_ussPath}");
-                return;
-            }
-            rootVisualElement.styleSheets.Add(styleSheet);
+            // var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(_ussPath);
+            // if (styleSheet == null)
+            // {
+            //     Debug.LogError($"Failed to load USS at path: {_ussPath}");
+            //     return;
+            // }
+            // rootVisualElement.styleSheets.Add(styleSheet);
         }
 
         private void InitializeControllers()

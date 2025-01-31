@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using PlaytestingReviewer.Video;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace PlaytestingReviewer.Tracks
 {
@@ -23,10 +23,23 @@ namespace PlaytestingReviewer.Tracks
         private FieldInfo _unityEventField; // For UnityEvents
         private Delegate _eventDelegate; // Stored delegate for unsubscribing
 
+        private float _selfCurrentTime = 0f;
+        private float _currentTime => _videoCapture == null ? _selfCurrentTime : _videoCapture.currentVideoTime;
+
+        private VideoCapture _videoCapture;
+
         private void Start()
         {
             SubscribeToEvent();
             InitializeTrack();
+
+            _videoCapture = FindFirstObjectByType<VideoCapture>();
+        }
+
+        private void Update()
+        {
+            if (_videoCapture != null) return;
+            _selfCurrentTime += Time.deltaTime;
         }
 
         private void InitializeTrack()
@@ -93,16 +106,17 @@ namespace PlaytestingReviewer.Tracks
 
         private void LogEvent()
         {
+            var instance = new SerializableDictionary();
+            instance.Add("time", _currentTime);
             foreach (var property in _propertiesToTrack)
             {
-                var instance = new SerializableDictionary();
-                instance.Add(property.name, property.value);
-                Debug.Log("name: " + property.name + " value: " + property.value);
-                _track.instances.Add(instance);
+                instance.Add(property.propertyName, property.value);
             }
+
+            _track.instances.Add(instance);
         }
 
-        private void OnDestroy()
+        private void OnApplicationQuit()
         {
             UnsubscribeFromEvent();
             AddTrackToCollector();
@@ -152,6 +166,9 @@ namespace PlaytestingReviewer.Tracks
     [CustomEditor(typeof(MetricRecorder))]
     public class MetricRecorderEditor : Editor
     {
+        // For an optional foldout to hide/show Tracked Properties
+        private bool showTrackedProperties = true;
+
         public override void OnInspectorGUI()
         {
             // Reference to the actual script
@@ -160,83 +177,104 @@ namespace PlaytestingReviewer.Tracks
             // Synchronize serialized object with actual fields
             serializedObject.Update();
 
-            // Draw the MonoBehaviour where the event resides
-            SerializedProperty eventSourceProp = serializedObject.FindProperty("_eventSource");
-            EditorGUILayout.PropertyField(eventSourceProp, new GUIContent("Event Source"));
-
-            // Dropdown for the event name
-            SerializedProperty eventNameProp = serializedObject.FindProperty("eventName");
-
-            if (eventSourceProp.objectReferenceValue != null)
+            // -- METRIC SETTINGS --
+            EditorGUILayout.LabelField("Metric Settings", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical("helpbox");
             {
-                MonoBehaviour eventSource = eventSourceProp.objectReferenceValue as MonoBehaviour;
-                if (eventSource != null)
-                {
-                    List<string> availableEvents = GetAvailableEvents(eventSource) ?? new List<string>();
-                    int selectedIndex = Mathf.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
+                // Metric Name
+                SerializedProperty metricNameProp = serializedObject.FindProperty("metricName");
+                EditorGUILayout.PropertyField(metricNameProp, new GUIContent("Metric Name"));
 
-                    selectedIndex = EditorGUILayout.Popup("Event", selectedIndex, availableEvents.ToArray());
-                    if (selectedIndex >= 0 && selectedIndex < availableEvents.Count)
+                EditorGUILayout.Space(5);
+
+                // Event Source + Event Name
+                SerializedProperty eventSourceProp = serializedObject.FindProperty("_eventSource");
+                EditorGUILayout.PropertyField(eventSourceProp, new GUIContent("Event Source"));
+
+                // Dropdown for the event name
+                SerializedProperty eventNameProp = serializedObject.FindProperty("_eventName");
+                if (eventSourceProp.objectReferenceValue != null)
+                {
+                    MonoBehaviour eventSource = eventSourceProp.objectReferenceValue as MonoBehaviour;
+                    if (eventSource != null)
                     {
-                        eventNameProp.stringValue = availableEvents[selectedIndex];
-                    }
-                }
-            }
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Tracked Properties", EditorStyles.boldLabel);
-
-            SerializedProperty propertiesList = serializedObject.FindProperty("_propertiesToTrack");
-
-            for (int i = propertiesList.arraySize - 1; i >= 0; i--) // Iterate backwards for safe removal
-            {
-                SerializedProperty propertyElement = propertiesList.GetArrayElementAtIndex(i);
-                if (propertyElement == null)
-                {
-                    Debug.LogError($"Property element at index {i} is null!");
-                    continue;
-                }
-
-                SerializedProperty targetObjectProp = propertyElement.FindPropertyRelative("targetObject");
-                SerializedProperty propertyNameProp = propertyElement.FindPropertyRelative("propertyName");
-
-                EditorGUILayout.BeginVertical("box");
-
-                EditorGUILayout.PropertyField(targetObjectProp, new GUIContent("Target Object"));
-
-                if (targetObjectProp.objectReferenceValue == null)
-                {
-                    Debug.LogWarning("Target Object is null! Assign an object in the Inspector.");
-                }
-                else
-                {
-                    MonoBehaviour targetMono = targetObjectProp.objectReferenceValue as MonoBehaviour;
-                    if (targetMono != null)
-                    {
-                        List<string> availableProps = GetAvailableProperties(targetMono) ?? new List<string>();
-                        int propIndex = Mathf.Max(0, availableProps.IndexOf(propertyNameProp.stringValue));
-                        propIndex = EditorGUILayout.Popup("Property", propIndex, availableProps.ToArray());
-
-                        if (propIndex >= 0 && propIndex < availableProps.Count)
+                        List<string> availableEvents = GetAvailableEvents(eventSource) ?? new List<string>();
+                        int selectedIndex = Mathf.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
+                        selectedIndex = EditorGUILayout.Popup("Event", selectedIndex, availableEvents.ToArray());
+                        if (selectedIndex >= 0 && selectedIndex < availableEvents.Count)
                         {
-                            propertyNameProp.stringValue = availableProps[propIndex];
+                            eventNameProp.stringValue = availableEvents[selectedIndex];
                         }
                     }
                 }
+            }
+            EditorGUILayout.EndVertical();
 
-                if (GUILayout.Button("Remove"))
+            EditorGUILayout.Space(10);
+
+            // -- TRACKED PROPERTIES --
+            showTrackedProperties = EditorGUILayout.Foldout(showTrackedProperties, "Tracked Properties", true,
+                EditorStyles.foldoutHeader);
+            if (showTrackedProperties)
+            {
+                EditorGUILayout.BeginVertical("helpbox");
                 {
-                    propertiesList.DeleteArrayElementAtIndex(i);
-                }
+                    SerializedProperty propertiesList = serializedObject.FindProperty("_propertiesToTrack");
 
+                    for (int i = propertiesList.arraySize - 1; i >= 0; i--)
+                    {
+                        SerializedProperty propertyElement = propertiesList.GetArrayElementAtIndex(i);
+                        if (propertyElement == null)
+                        {
+                            Debug.LogError($"Property element at index {i} is null!");
+                            continue;
+                        }
+
+                        EditorGUILayout.BeginVertical("box");
+                        {
+                            SerializedProperty targetObjectProp = propertyElement.FindPropertyRelative("targetObject");
+                            EditorGUILayout.PropertyField(targetObjectProp, new GUIContent("Target Object"));
+
+                            if (targetObjectProp.objectReferenceValue != null)
+                            {
+                                SerializedProperty propertyNameProp =
+                                    propertyElement.FindPropertyRelative("propertyName");
+                                MonoBehaviour targetMono = targetObjectProp.objectReferenceValue as MonoBehaviour;
+                                if (targetMono != null)
+                                {
+                                    List<string> availableProps =
+                                        GetAvailableProperties(targetMono) ?? new List<string>();
+                                    int propIndex = Mathf.Max(0, availableProps.IndexOf(propertyNameProp.stringValue));
+                                    propIndex = EditorGUILayout.Popup("Property", propIndex, availableProps.ToArray());
+                                    if (propIndex >= 0 && propIndex < availableProps.Count)
+                                    {
+                                        propertyNameProp.stringValue = availableProps[propIndex];
+                                    }
+                                }
+                            }
+
+                            // Remove button
+                            if (GUILayout.Button("Remove", GUILayout.MaxWidth(75)))
+                            {
+                                propertiesList.DeleteArrayElementAtIndex(i);
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                    }
+
+                    // Add property button
+                    EditorGUILayout.Space();
+                    GUIStyle addButtonStyle = new GUIStyle(GUI.skin.button);
+                    addButtonStyle.fontStyle = FontStyle.Bold;
+                    if (GUILayout.Button("Add Property", addButtonStyle))
+                    {
+                        propertiesList.InsertArrayElementAtIndex(propertiesList.arraySize);
+                    }
+                }
                 EditorGUILayout.EndVertical();
             }
 
-            if (GUILayout.Button("Add Property"))
-            {
-                propertiesList.InsertArrayElementAtIndex(propertiesList.arraySize);
-            }
-
+            // Apply modifications
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -252,11 +290,11 @@ namespace PlaytestingReviewer.Tracks
             Type type = target.GetType();
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
 
-            // 1) Grab all public C# events
+            // 1) C# events
             var dotNetEvents = type.GetEvents(flags).Select(e => e.Name);
             eventNames.AddRange(dotNetEvents);
 
-            // 2) Grab all public fields that are UnityEvents (or derived from UnityEventBase)
+            // 2) UnityEvent fields
             var unityEventFields = type.GetFields(flags)
                 .Where(field => typeof(UnityEventBase).IsAssignableFrom(field.FieldType))
                 .Select(field => field.Name);

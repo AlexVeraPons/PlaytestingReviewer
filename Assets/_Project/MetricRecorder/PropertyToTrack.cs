@@ -9,17 +9,17 @@ namespace PlaytestingReviewer.Tracks
     public class PropertyToTrack
     {
         public MonoBehaviour targetObject; // The MonoBehaviour to track
-        public string name; // The property to extract
+        [FormerlySerializedAs("name")] public string propertyName; // The property to extract
         public object value => targetObject.GetType();
 
         public object GetValue()
         {
-            if (targetObject == null || string.IsNullOrEmpty(name))
+            if (targetObject == null || string.IsNullOrEmpty(propertyName))
                 return null;
 
             Type type = targetObject.GetType();
-            PropertyInfo property = type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);    
-            FieldInfo field = type.GetField(name, BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);    
+            FieldInfo field = type.GetField(propertyName, BindingFlags.Public | BindingFlags.Instance);
 
             if (property != null)
                 return property.GetValue(targetObject);

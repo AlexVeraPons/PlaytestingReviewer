@@ -4,13 +4,15 @@ using System.Collections;
 using System.IO;
 using System.Diagnostics;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 
 namespace PlaytestingReviewer.Video
 {
     public class VideoCapture : MonoBehaviour
     {
-        [Header("Camera & Capture Settings")] public Camera captureCamera;
+        [Header("Camera & Capture Settings")] 
+        public Camera captureCamera;
         private Camera mainCamera;
 
         public int width = 1280;
@@ -31,18 +33,20 @@ namespace PlaytestingReviewer.Video
         private string folderPath;
         private int frameCount;
 
-        private string _outputPath;
-        private string _outputFileName;
+        public string outputPath;
+        public string outputFileName;
 
-        [Header("Capture Conditions")] [SerializeField]
-        private bool captureOnStart = false;
+        private float _currentVideoTime = 0f;
+        public float currentVideoTime => _currentVideoTime;
+
+        [Header("Capture Conditions")]
+        [SerializeField] private bool captureOnStart = false;
 
         void Start()
         {
             ffmpegPath = ffmpegExePath;
             mainCamera = Camera.main;
 
-            // If no capture camera is assigned, create a hidden one
             if (captureCamera == null)
             {
                 GameObject captureCamObj = new GameObject("HiddenCaptureCamera");
@@ -70,21 +74,6 @@ namespace PlaytestingReviewer.Video
             }
         }
 
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (isCapturing)
-                {
-                    StopCapture();
-                }
-                else
-                {
-                    StartCapture();
-                }
-            }
-        }
-
         public void StartCapture()
         {
             if (isCapturing)
@@ -92,6 +81,7 @@ namespace PlaytestingReviewer.Video
                 Debug.LogWarning("Already capturing!");
                 return;
             }
+
 
             folderPath = Path.Combine(Application.dataPath,
                 "RecordedFrames_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss"));
@@ -143,7 +133,7 @@ namespace PlaytestingReviewer.Video
                 SyncCaptureCamera();
 
                 timeSinceLastFrame += Time.deltaTime;
-
+                
                 if (timeSinceLastFrame >= captureDeltaTime)
                 {
                     timeSinceLastFrame -= captureDeltaTime;
@@ -162,7 +152,6 @@ namespace PlaytestingReviewer.Video
 
             captureCamera.transform.position = mainCamera.transform.position;
             captureCamera.transform.rotation = mainCamera.transform.rotation;
-
             captureCamera.fieldOfView = mainCamera.fieldOfView;
             captureCamera.orthographic = mainCamera.orthographic;
             captureCamera.orthographicSize = mainCamera.orthographicSize;
@@ -195,6 +184,7 @@ namespace PlaytestingReviewer.Video
             File.WriteAllBytes(filePath, pngData);
 
             frameCount++;
+            _currentVideoTime += captureDeltaTime;
         }
 
         private IEnumerator EncodeToMP4()
@@ -207,10 +197,13 @@ namespace PlaytestingReviewer.Video
                 yield break;
             }
 
-            string outFileName = GetOutFileName();
-            outFileName = "RecordedVideo_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4";
-            string outFilePath = GetOutFilePath();
-            outFilePath = Path.Combine(PathManager.VideoOutputPath, outFileName);
+            string outFileName = !string.IsNullOrEmpty(outputFileName)
+                ? outputFileName
+                : "RecordedVideo_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4";
+
+            string outFilePath = !string.IsNullOrEmpty(outputPath)
+                ? Path.Combine(outputPath, outFileName)
+                : Path.Combine(PathManager.VideoOutputPath, outFileName);
 
             string args = $"-y -framerate {targetFramerate} -i \"{Path.Combine(folderPath, "frame_%04d.png")}\" " +
                           $"-c:v libx264 -pix_fmt yuv420p \"{outFilePath}\"";
@@ -255,16 +248,6 @@ namespace PlaytestingReviewer.Video
             }
 
             yield return null;
-        }
-
-        private string GetOutFilePath()
-        {
-            return _outputPath == null  ? Path.Combine(PathManager.VideoOutputPath, GetOutFileName()) : _outputPath;
-        }
-
-        private string GetOutFileName()
-        {
-            return _outputFileName == null ?"RecordedVideo_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4" : _outputFileName; 
         }
     }
 

@@ -6,7 +6,7 @@ namespace PlaytestingReviewer.Tracks
 {
     public class TrackCollector : MonoBehaviour
     {
-        private List<Track> _tracks;
+        private List<Track> _tracks = new List<Track>();
 
         public void AddTrack(Track track)
         {
@@ -15,6 +15,7 @@ namespace PlaytestingReviewer.Tracks
 
         public TrackCollection GetTracks()
         {
+            if(_tracks == null) return null;
             TrackCollection tracks = new TrackCollection
             {
                 tracks = _tracks.ToArray()

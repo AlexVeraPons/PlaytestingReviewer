@@ -14,6 +14,9 @@ namespace PlaytestingReviewer.Tracks
 
         [SerializeField] private VideoCapture _videoCapture;
 
+        private string _folderName;
+        private string _folderPath;
+
         private void Start()
         {
             if (_trackCollector == null)
@@ -25,7 +28,30 @@ namespace PlaytestingReviewer.Tracks
             if (_videoCapture == null)
             {
                 _videoCapture = FindFirstObjectByType<VideoCapture>();
-            }            
+            }
+
+            CreateFutureDirectory();
+            _videoCapture.outputPath = _folderPath;
+            _videoCapture.outputFileName = _folderName + ".mp4";
+        }
+
+        private void CreateFutureDirectory()
+        {
+            _folderName = "Review" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+            string relativePath = "Assets/StreamingAssets/Output/Review";
+
+            if (!AssetDatabase.IsValidFolder(relativePath))
+            {
+                AssetDatabase.CreateFolder("Assets/StreamingAssets/Output", "Review");
+            }
+
+            // Create a new folder inside Review
+            AssetDatabase.CreateFolder(relativePath, _folderName);
+            _folderPath = relativePath + "/" + _folderName;
+
+            // Refresh AssetDatabase to reflect changes in Unity
+            AssetDatabase.Refresh();
         }
 
         private void OnDestroy()
@@ -35,22 +61,16 @@ namespace PlaytestingReviewer.Tracks
 
         private void CreateReviewObject()
         {
-            //first create folder for the review
-            string folderName = "Review" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            AssetDatabase.CreateFolder(PathManager.ReviewOutputPath,folderName);
-            
-            string path = PathManager.ReviewOutputPath + "/" + folderName;
-            
             TrackCollection tracks = _trackCollector.GetTracks();
-            string reviewObjectTracksPath = path + "/" + folderName + ".review";
+            string reviewObjectTracksPath = _folderPath + "/" + _folderName + ".review";
             TrackConverter.TracksToJson(tracks,reviewObjectTracksPath);
             
             Review reviewObject = ScriptableObject.CreateInstance<Review>();
             reviewObject.tracksPath =reviewObjectTracksPath;
-            reviewObject.videoPath =path + "/" + folderName + ".mp4";            
+            reviewObject.videoPath =_folderPath + "/" + _folderName + ".mp4";            
 
             //save the asset into the folder
-            AssetDatabase.CreateAsset(reviewObject, path);
+            AssetDatabase.CreateAsset(reviewObject, _folderPath + "/"+"Review.asset");
         }
     }
 }

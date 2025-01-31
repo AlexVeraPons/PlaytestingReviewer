@@ -92,7 +92,7 @@ namespace PlaytestingReviewer.Editors
             for (int i = 0; i < indicatorCount; i++)
             {
                 float t = (float)i / (indicatorCount - 1);
-                labels[i] = Mathf.Lerp(0, videoLength, t).ToString("0");
+                labels[i] = Mathf.Lerp(0, videoLength, t).ToString("0.0");
             }
             return labels;
         }
