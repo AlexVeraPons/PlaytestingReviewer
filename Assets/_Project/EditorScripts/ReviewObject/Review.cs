@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using PlaytestingReviewer.Tracks;
-using PlasticPipe.PlasticProtocol.Messages;
 
 namespace PlaytestingReviewer.Editors
 {
@@ -48,17 +47,13 @@ namespace PlaytestingReviewer.Editors
                 Debug.Log("Double-clicked on Review asset:");
             }
 
-            if (e.type == EventType.MouseDown && e.clickCount == 2 && selectionRect.Contains(e.mousePosition))
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                Review review = AssetDatabase.LoadAssetAtPath<Review>(path);
+            if (e.type != EventType.MouseDown || e.clickCount != 2 || !selectionRect.Contains(e.mousePosition)) return;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            Review review = AssetDatabase.LoadAssetAtPath<Review>(path);
 
-                if (review != null)
-                {
-                    PlaytestReviewerEditor editor = ScriptableObject.CreateInstance<PlaytestReviewerEditor>();
-                    editor.OpenWindow(review);
-                }
-            }
+            if (review == null) return;
+            PlaytestReviewerEditor editor = ScriptableObject.CreateInstance<PlaytestReviewerEditor>();
+            editor.OpenWindow(review);
         }
     }
 #endif

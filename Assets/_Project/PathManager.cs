@@ -10,6 +10,7 @@ namespace PlaytestingReviewer
         public static string FFmpegPath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
         public static string VideoOutputPath => Application.streamingAssetsPath + "/Output";
         public static string FrameOutputPath => Application.streamingAssetsPath + "/Frames";
+        public static string ReviewOutputPath => Application.streamingAssetsPath + "/Review";
 
         public static readonly string ImageVideoLoadedPath = "Assets/_Project/Textures/videoLoaded.png";
 

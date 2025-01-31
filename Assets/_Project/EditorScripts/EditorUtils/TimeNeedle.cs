@@ -1,5 +1,4 @@
 using System;
-using Codice.Client.Common;
 using PlaytestingReviewer.Video;
 using UnityEditor;
 using UnityEngine;
@@ -19,10 +18,10 @@ namespace PlaytestingReviewer.Editors
             _timeIndicatorController = timeIndicatorController;
             _root = root;
             _videoPlayer = videoPlayer;
-            EditorApplication.update += updatePosition;
+            EditorApplication.update += UpdatePosition;
         }
 
-        private void updatePosition()
+        private void UpdatePosition()
         {
             if (_videoPlayer == null || _timeNeedle == null) { return; }
 

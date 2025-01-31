@@ -2,7 +2,6 @@ using System;
 using PlaytestingReviewer.Video;
 using UnityEngine.UIElements;
 using UnityEditor;
-using static Codice.Client.BaseCommands.KnownCommandOptions;
 using UnityEngine.Video;
 
 namespace PlaytestingReviewer.Editors

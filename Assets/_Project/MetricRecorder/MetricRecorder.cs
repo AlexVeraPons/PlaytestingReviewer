@@ -12,10 +12,10 @@ namespace PlaytestingReviewer.Tracks
     public class MetricRecorder : MonoBehaviour
     {
         public string metricName = "Metric";
-        
-        private MonoBehaviour _eventSource; // The MonoBehaviour holding the event
-        private string _eventName; // The name of the event to track
-        private List<PropertyToTrack> _propertiesToTrack; // Properties to track
+
+        [SerializeField] private MonoBehaviour _eventSource; // The MonoBehaviour holding the event
+        [SerializeField] private string _eventName; // The name of the event to track
+        [SerializeField] private List<PropertyToTrack> _propertiesToTrack; // Properties to track
 
         private Track _track;
 
@@ -105,6 +105,20 @@ namespace PlaytestingReviewer.Tracks
         private void OnDestroy()
         {
             UnsubscribeFromEvent();
+            AddTrackToCollector();
+        }
+
+        private void AddTrackToCollector()
+        {
+            TrackCollector collector = FindFirstObjectByType<TrackCollector>();
+
+            if (collector == null)
+            {
+                Debug.LogError("There is no TrackCollector in the scene.");
+                return;
+            }
+
+            collector.AddTrack(_track);
         }
 
         private void UnsubscribeFromEvent()
@@ -147,50 +161,59 @@ namespace PlaytestingReviewer.Tracks
             serializedObject.Update();
 
             // Draw the MonoBehaviour where the event resides
-            SerializedProperty eventSourceProp = serializedObject.FindProperty("eventSource");
+            SerializedProperty eventSourceProp = serializedObject.FindProperty("_eventSource");
             EditorGUILayout.PropertyField(eventSourceProp, new GUIContent("Event Source"));
 
             // Dropdown for the event name
             SerializedProperty eventNameProp = serializedObject.FindProperty("eventName");
-            MonoBehaviour eventSource = eventSourceProp.objectReferenceValue as MonoBehaviour;
 
-            // Only display the dropdown if we have a valid eventSource
-            if (eventSource != null)
+            if (eventSourceProp.objectReferenceValue != null)
             {
-                List<string> availableEvents = GetAvailableEvents(eventSource);
-                int selectedIndex = Mathf.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
-
-                selectedIndex = EditorGUILayout.Popup("Event", selectedIndex, availableEvents.ToArray());
-                if (selectedIndex >= 0 && selectedIndex < availableEvents.Count)
+                MonoBehaviour eventSource = eventSourceProp.objectReferenceValue as MonoBehaviour;
+                if (eventSource != null)
                 {
-                    eventNameProp.stringValue = availableEvents[selectedIndex];
+                    List<string> availableEvents = GetAvailableEvents(eventSource) ?? new List<string>();
+                    int selectedIndex = Mathf.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
+
+                    selectedIndex = EditorGUILayout.Popup("Event", selectedIndex, availableEvents.ToArray());
+                    if (selectedIndex >= 0 && selectedIndex < availableEvents.Count)
+                    {
+                        eventNameProp.stringValue = availableEvents[selectedIndex];
+                    }
                 }
             }
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Tracked Properties", EditorStyles.boldLabel);
 
-            // Now draw the property list
             SerializedProperty propertiesList = serializedObject.FindProperty("_propertiesToTrack");
 
-            for (int i = 0; i < propertiesList.arraySize; i++)
+            for (int i = propertiesList.arraySize - 1; i >= 0; i--) // Iterate backwards for safe removal
             {
                 SerializedProperty propertyElement = propertiesList.GetArrayElementAtIndex(i);
+                if (propertyElement == null)
+                {
+                    Debug.LogError($"Property element at index {i} is null!");
+                    continue;
+                }
+
                 SerializedProperty targetObjectProp = propertyElement.FindPropertyRelative("targetObject");
                 SerializedProperty propertyNameProp = propertyElement.FindPropertyRelative("propertyName");
 
                 EditorGUILayout.BeginVertical("box");
 
-                // Pick the MonoBehaviour that holds the property/field
                 EditorGUILayout.PropertyField(targetObjectProp, new GUIContent("Target Object"));
 
-                // Display a dropdown of all public fields/properties if we have a target
-                if (targetObjectProp.objectReferenceValue != null)
+                if (targetObjectProp.objectReferenceValue == null)
+                {
+                    Debug.LogWarning("Target Object is null! Assign an object in the Inspector.");
+                }
+                else
                 {
                     MonoBehaviour targetMono = targetObjectProp.objectReferenceValue as MonoBehaviour;
                     if (targetMono != null)
                     {
-                        List<string> availableProps = GetAvailableProperties(targetMono);
+                        List<string> availableProps = GetAvailableProperties(targetMono) ?? new List<string>();
                         int propIndex = Mathf.Max(0, availableProps.IndexOf(propertyNameProp.stringValue));
                         propIndex = EditorGUILayout.Popup("Property", propIndex, availableProps.ToArray());
 
@@ -201,7 +224,6 @@ namespace PlaytestingReviewer.Tracks
                     }
                 }
 
-                // Remove button
                 if (GUILayout.Button("Remove"))
                 {
                     propertiesList.DeleteArrayElementAtIndex(i);
@@ -210,13 +232,11 @@ namespace PlaytestingReviewer.Tracks
                 EditorGUILayout.EndVertical();
             }
 
-            // Button to add new property
             if (GUILayout.Button("Add Property"))
             {
                 propertiesList.InsertArrayElementAtIndex(propertiesList.arraySize);
             }
 
-            // Apply changes to the serialized object
             serializedObject.ApplyModifiedProperties();
         }
 

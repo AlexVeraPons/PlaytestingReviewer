@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -10,8 +11,7 @@ namespace PlaytestingReviewer.Tracks
         public TrackType type;
         public string iconName;
         public string name;
-        [SerializeField]
-        public List<SerializableDictionary> instances = new List<SerializableDictionary>();
+        [SerializeField] public List<SerializableDictionary> instances = new List<SerializableDictionary>();
     }
 
     public class TrackConverter
@@ -85,19 +85,14 @@ namespace PlaytestingReviewer.Tracks
     [System.Serializable]
     public class TrackCollection
     {
-        public Track[] tracks;
-        public TrackCollection() {}
+        public Track[] tracks; 
+
+        public TrackCollection() { }
+        public TrackCollection(Track[] tracks) { this.tracks = tracks; }
         public TrackCollection(string pathToJson)
         {
             TrackCollection trackCollection = TrackConverter.JsonToTracks(pathToJson);
-            if (trackCollection != null)
-            {
-                tracks = trackCollection.tracks;
-            }
-            else
-            {
-                tracks = new Track[0];
-            }
+            tracks = trackCollection != null ? trackCollection.tracks : Array.Empty<Track>();
         }
     }
 
