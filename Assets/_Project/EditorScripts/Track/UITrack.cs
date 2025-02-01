@@ -29,6 +29,8 @@ namespace PlaytestingReviewer.Editors
 
         protected string _title = "Description";
         protected Label _descriptionLabel;
+        
+        protected StyleColor barColor = new StyleColor(new Color(0.90f, 0.90f, 1f));
 
         /// <summary>
         /// Constructor for the track class
@@ -62,7 +64,6 @@ namespace PlaytestingReviewer.Editors
                     _resizeDebounceTimer = 0;
                     _shouldStartResizeTimer = false;
                     OnResize?.Invoke();
-                    Debug.Log("Action called");
                 }
             }
         }
@@ -142,13 +143,14 @@ namespace PlaytestingReviewer.Editors
             };
 
             // Pastel bar on the left side
+           
             var pastelBar = new VisualElement
             {
                 style =
                 {
                     width = 8,
                     height = new Length(100, LengthUnit.Percent),
-                    backgroundColor = new StyleColor(new Color(0.90f, 0.90f, 1f)),
+                    backgroundColor = barColor,
                     marginLeft = -5f,
                     borderBottomLeftRadius = 6,
                     borderTopLeftRadius = 6
@@ -241,7 +243,7 @@ namespace PlaytestingReviewer.Editors
 
         protected virtual void AddMenuItems(GenericMenu menu) { } // Default implementation
 
-        protected void ToggleVisibility()
+        protected virtual void ToggleVisibility()
         {
             if (_informationContainer == null)
             {

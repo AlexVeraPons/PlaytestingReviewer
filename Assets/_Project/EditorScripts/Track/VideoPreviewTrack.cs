@@ -110,7 +110,9 @@ namespace PlaytestingReviewer.Editors
             }
 
             string videoPath = _videoPlayer.GetVideoPath();
-            var framePaths = await FFmpegUtils.ExtractBatchFramesAsync(videoPath, times, "previewBatch");
+            var framePaths = await FFmpegUtils.ExtractBatchFramesAsync(videoPath, 
+                times, 
+                "previewBatch");
 
             for (int i = 0; i < framePaths.Count; i++)
             {
@@ -122,6 +124,7 @@ namespace PlaytestingReviewer.Editors
                 byte[] fileBytes = File.ReadAllBytes(filePath);
                 var texture = new Texture2D(2, 2);
                 texture.LoadImage(fileBytes);
+                if(_previews[i] == null) RefreshPreviewsBatch();
                 _previews[i].style.backgroundImage = new StyleBackground(texture);
 
                 File.Delete(filePath);

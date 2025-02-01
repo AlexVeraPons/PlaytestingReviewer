@@ -7,7 +7,6 @@ namespace PlaytestingReviewer.Editors
     [CreateAssetMenu(menuName = "PlaytestReviwer/Review")]
     public class Review : ScriptableObject
     {
-        public string Name;
         public string videoPath;
         public string tracksPath;
 
@@ -42,11 +41,6 @@ namespace PlaytestingReviewer.Editors
         private void OnProjectWindowItemGUI(string guid, Rect selectionRect)
         {
             Event e = Event.current;
-            if (e.type == EventType.MouseDown && e.clickCount == 2 && selectionRect.Contains(e.mousePosition))
-            {
-                Debug.Log("Double-clicked on Review asset:");
-            }
-
             if (e.type != EventType.MouseDown || e.clickCount != 2 || !selectionRect.Contains(e.mousePosition)) return;
             string path = AssetDatabase.GUIDToAssetPath(guid);
             Review review = AssetDatabase.LoadAssetAtPath<Review>(path);

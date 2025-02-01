@@ -229,6 +229,7 @@ namespace PlaytestingReviewer.Video
             if (frame >= 0 && frame < (long)_videoPlayer.frameCount)
             {
                 _videoPlayer.frame = frame;
+                _currentTime = Mathf.Clamp01((float)frame / (float)_videoPlayer.frameCount);
             }
         }
 

@@ -29,6 +29,18 @@ namespace PlaytestingReviewer.Editors
             OnResize += StartInitialization;
         }
 
+        protected override void InitializeDescription(VisualElement description)
+        {
+            barColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f));
+            base.InitializeDescription(description);
+        }
+
+        protected override void ToggleVisibility()
+        {
+            base.ToggleVisibility();
+            CreateTimeMarkers();
+        }
+
         public void StartInitialization()
         {
             if (_initialized == false)
@@ -56,9 +68,7 @@ namespace PlaytestingReviewer.Editors
 
             foreach (var instance in _track.instances)
             {
-                Debug.Log(instance.ToDictionary());
                 if (!instance.ToDictionary().TryGetValue("time", out object timeValue)) continue;
-
                 if (!float.TryParse(timeValue.ToString(), out float time)) continue;
 
                 float normalizedTime = time / totalDuration;
@@ -76,8 +86,8 @@ namespace PlaytestingReviewer.Editors
                         borderBottomRightRadius = 50,
 
                         // Background with a soft glow effect
-                        backgroundColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f)), // Softer red
-                        unityBackgroundImageTintColor = new Color(1f, 1f, 1f, 0.1f), // Slight glow effect
+                        backgroundColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f)), 
+                        unityBackgroundImageTintColor = new Color(1f, 1f, 1f, 0.1f), 
 
                         // Add a nice border
                         borderTopWidth = 0.3f,
@@ -101,6 +111,7 @@ namespace PlaytestingReviewer.Editors
                         // Offset by half its size to center it properly
                         marginLeft = -10,
                         marginTop = -10,
+                        marginRight = -10,
 
                         // Soft shadow to make it pop
                         unityTextOutlineColor = new Color(0, 0, 0, 0.5f),

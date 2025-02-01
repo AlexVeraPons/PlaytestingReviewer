@@ -1,0 +1,395 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "ColorChanges",
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.8"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.63333"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.433328"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.233343"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.23337"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.66671"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.83338"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.96671"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.40008"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.70008"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "16.06676"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "16.66676"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "19.50005"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "19.93337"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "20.3667"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "21.73335"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "23.23332"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "25.76662"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "27.23326"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "27.99992"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "28.73324"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "29.56656"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "30.83321"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "32.29985"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

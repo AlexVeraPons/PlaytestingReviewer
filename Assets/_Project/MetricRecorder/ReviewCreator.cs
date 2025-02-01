@@ -39,18 +39,17 @@ namespace PlaytestingReviewer.Tracks
         {
             _folderName = "Review" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-            string relativePath = "Assets/StreamingAssets/Output/Review";
+            string relativePath = "Assets/_Project/ReviewOutput";
 
             if (!AssetDatabase.IsValidFolder(relativePath))
             {
-                AssetDatabase.CreateFolder("Assets/StreamingAssets/Output", "Review");
+                AssetDatabase.CreateFolder("Assets/_Project/", "ReviewOutput");
             }
 
-            // Create a new folder inside Review
             AssetDatabase.CreateFolder(relativePath, _folderName);
             _folderPath = relativePath + "/" + _folderName;
 
-            // Refresh AssetDatabase to reflect changes in Unity
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
@@ -71,6 +70,7 @@ namespace PlaytestingReviewer.Tracks
 
             //save the asset into the folder
             AssetDatabase.CreateAsset(reviewObject, _folderPath + "/"+"Review.asset");
+            AssetDatabase.SaveAssets();
         }
     }
 }

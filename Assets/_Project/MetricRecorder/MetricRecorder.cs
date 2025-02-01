@@ -71,7 +71,6 @@ namespace PlaytestingReviewer.Tracks
                 _eventDelegate = Delegate.CreateDelegate(eventHandlerType, this, methodInfo);
 
                 _dotNetEvent.AddEventHandler(_eventSource, _eventDelegate);
-                Debug.Log($"Subscribed to C# event: {_eventName}");
                 return;
             }
 
@@ -88,7 +87,6 @@ namespace PlaytestingReviewer.Tracks
                     {
                         UnityAction action = OnUnityEventTriggered;
                         addListenerMethod.Invoke(unityEvent, new object[] { action });
-                        Debug.Log($"Subscribed to UnityEvent: {_eventName}");
                     }
                 }
             }
@@ -110,7 +108,8 @@ namespace PlaytestingReviewer.Tracks
             instance.Add("time", _currentTime);
             foreach (var property in _propertiesToTrack)
             {
-                instance.Add(property.propertyName, property.value);
+                //TODO: Here we should access the property value instead of adding the property.value since the property value is just where to locate the value
+                instance.Add(property.propertyName, property.value); 
             }
 
             _track.instances.Add(instance);
