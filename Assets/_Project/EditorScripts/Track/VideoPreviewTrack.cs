@@ -75,7 +75,7 @@ namespace PlaytestingReviewer.Editors
         {
             base.TrackUpdate();
 
-            if (_inNeedOfImages && _timeRelations.SetupComplete() && !_isRefreshing)
+            if (_inNeedOfImages && _timeRelations.IsSetupComplete() && !_isRefreshing)
             {
                 _awaitingRefresh = true;
                 _timeSinceLastRequest = 0f;
@@ -105,7 +105,7 @@ namespace PlaytestingReviewer.Editors
             var times = new List<float>();
             foreach (var preview in _previews)
             {
-                float time = _timeRelations.GetTimeFromLeftWorldPosition(preview.worldBound.x);
+                float time = _timeRelations.GetTimeFromScreenX(preview.worldBound.x);
                 times.Add(time);
             }
 

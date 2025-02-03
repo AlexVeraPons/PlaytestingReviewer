@@ -1,15 +1,18 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 namespace PlaytestingReviewer.Other
 {
     public class CircleReaction : MonoBehaviour
     {
-        public UnityEvent OnColorChange;
+        public Action OnColorChangeAction;
 
         public float moveSpeed = 5f;
         [SerializeField] private SpriteRenderer _spriteRenderer;
         public Color _currentColor;
+        private int randomInt = 20;
 
         private void Start()
         {
@@ -42,9 +45,10 @@ namespace PlaytestingReviewer.Other
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                OnColorChange.Invoke();
                 _currentColor = new Color(Random.value, Random.value, Random.value);
-                _spriteRenderer.color = _currentColor;
+                _spriteRenderer.color =  new Color(Random.value, Random.value, Random.value);
+                Debug.Log("space pressed");
+                OnColorChangeAction?.Invoke();
             }
         }
     }

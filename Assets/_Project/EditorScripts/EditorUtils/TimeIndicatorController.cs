@@ -17,9 +17,6 @@ namespace PlaytestingReviewer.Editors
         private float _currentSpaceBetweenIndicators = 10f;
         private float _videoLength;
         private IVideoPlayer _videoPlayer;
-
-        private bool _mouseDown;
-
         private ZoomUpdater _zoomUpdater;
 
         public TimeIndicatorController(VisualElement root, IVideoPlayer videoPlayer, ZoomUpdater zoomUpdater)
@@ -124,13 +121,12 @@ namespace PlaytestingReviewer.Editors
             return Mathf.Lerp(initialLabel, lastLabel, time / videoLength);
         }
 
-        public float GetTimeFromLeftWorldPosition(float x)
+        public float GetTimeFromScreenX(float x)
         {
             float initialLabel = _timeIndicators[0].worldBound.x;
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
             float videoLength = _videoLength;
 
-            // Calculate the normalized position of x between initialLabel and lastLabel
             float normalizedPosition = (x - initialLabel) / (lastLabel - initialLabel);
 
             // Map the normalized position to the video length
@@ -142,21 +138,12 @@ namespace PlaytestingReviewer.Editors
             if (evt.button == 0)
             {
                 Vector2 mousePosition = evt.mousePosition;
-                float time = GetTimeFromWorldPosition(mousePosition.x);
+                float time = GetTimeFromScreenX(mousePosition.x);
                 int targetFrame = Mathf.FloorToInt(time * _videoPlayer.GetVideoLengthFrames() / _videoLength);
                 _videoPlayer.SetFrame(targetFrame);
             }
         }
-
-        public float GetTimeFromWorldPosition(float x)
-        {
-            float initialLabel = _timeIndicators[0].worldBound.x;
-            float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
-            float videoLength = _videoLength;
-            return Mathf.Lerp(0, videoLength, (x - initialLabel) / (lastLabel - initialLabel));
-        }
-
-        public bool SetupComplete()
+        public bool IsSetupComplete()
         {
             if (_timeIndicators == null || _timeIndicators.Count == 0) { return false; }
 

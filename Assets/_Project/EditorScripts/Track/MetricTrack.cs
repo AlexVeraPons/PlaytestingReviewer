@@ -77,19 +77,17 @@ namespace PlaytestingReviewer.Editors
                 {
                     style =
                     {
-                        // Circular shape
                         width = 20,
                         height = 20,
-                        borderTopLeftRadius = 50,
-                        borderTopRightRadius = 50,
-                        borderBottomLeftRadius = 50,
-                        borderBottomRightRadius = 50,
 
-                        // Background with a soft glow effect
-                        backgroundColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f)), 
-                        unityBackgroundImageTintColor = new Color(1f, 1f, 1f, 0.1f), 
+                        // No rounded corners
+                        borderTopLeftRadius = 0,
+                        borderTopRightRadius = 0,
+                        borderBottomLeftRadius = 0,
+                        borderBottomRightRadius = 0,
 
-                        // Add a nice border
+                        // Diamond color & border
+                        backgroundColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f)),
                         borderTopWidth = 0.3f,
                         borderBottomWidth = 0.3f,
                         borderLeftWidth = 0.3f,
@@ -99,23 +97,20 @@ namespace PlaytestingReviewer.Editors
                         borderLeftColor = new StyleColor(Color.white),
                         borderRightColor = new StyleColor(Color.white),
 
-                        // Position absolutely inside the container
                         position = Position.Absolute,
 
-                        // Horizontal positioning (normalized percentage)
+                        // Move it horizontally based on normalized time
                         left = new Length(normalizedTime * 100, LengthUnit.Percent),
 
-                        // Centering it vertically
+                        // Vertically center it
                         top = new Length(50, LengthUnit.Percent),
 
-                        // Offset by half its size to center it properly
+                        // Offset by half
                         marginLeft = -10,
                         marginTop = -10,
-                        marginRight = -10,
 
-                        // Soft shadow to make it pop
-                        unityTextOutlineColor = new Color(0, 0, 0, 0.5f),
-                        unityTextOutlineWidth = 1
+                        // Rotate 45° to create the diamond shape
+                        rotate = new Rotate(45f)
                     }
                 };
 
