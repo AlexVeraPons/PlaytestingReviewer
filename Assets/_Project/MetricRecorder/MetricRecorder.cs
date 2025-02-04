@@ -164,7 +164,6 @@ namespace PlaytestingReviewer.Tracks
         /// </summary>
         private void LogEvent()
         {
-            // Create an instance of your serializable dictionary to store event data.
             var instance = new SerializableDictionary();
             instance.Add("time", _currentTime);
 
@@ -200,7 +199,6 @@ namespace PlaytestingReviewer.Tracks
                         }
                         else
                         {
-                            // If neither a field nor a property is found, fallback
                             value = property.value;
                             Debug.LogWarning(property.propertyName + " was not found in " + property.targetObject +
                                              ".");

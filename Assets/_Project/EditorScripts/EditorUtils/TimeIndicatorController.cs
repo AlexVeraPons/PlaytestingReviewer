@@ -5,19 +5,32 @@ using PlaytestingReviewer.Video;
 
 namespace PlaytestingReviewer.Editors
 {
+    /// <summary>
+    /// Controls the visual time indicators in the editor timeline, providing functionality
+    /// to map time values to screen positions and vice versa. It also handles the setup,
+    /// management, and updating of the time indicator labels.
+    /// </summary>
     public class TimeIndicatorController : ITimePositionTranslator
     {
+        // CONSTANTS
         private const int InitialSpaceBetweenIndicators = 13;
         private const float LabelSize = 20f;
+        
+        //Vidoe related
+        private float _videoLength;
+        private readonly IVideoPlayer _videoPlayer;
 
+        //UI elements
         private List<Label> _timeIndicators;
         private ScrollView timeScroll;
         private VisualElement timeView;
-
+    
+        // Zooming and positioning
         private float _currentSpaceBetweenIndicators = 10f;
-        private float _videoLength;
-        private IVideoPlayer _videoPlayer;
-        private ZoomUpdater _zoomUpdater;
+        private readonly ZoomUpdater _zoomUpdater;
+
+
+        // Constructor and setup
 
         public TimeIndicatorController(VisualElement root, IVideoPlayer videoPlayer, ZoomUpdater zoomUpdater)
         {
@@ -29,7 +42,6 @@ namespace PlaytestingReviewer.Editors
             timeView.RegisterCallback<MouseDownEvent>(OnMouseDown);
         }
 
-
         private void SetUpTimeControl(VisualElement root)
         {
             timeScroll = root.Q<ScrollView>("TimeScroll");
@@ -38,11 +50,13 @@ namespace PlaytestingReviewer.Editors
             timeScroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             _zoomUpdater.OnZoomed += ZoomTimeIndicators;
         }
-
+        
+        // UI management
         public void ReloadIndicators(float videoLength)
         {
             _videoLength = videoLength;
             _timeIndicators = new List<Label>();
+            
             float trackViewWidth = timeScroll.resolvedStyle.width;
             int indicatorCount = Mathf.FloorToInt(trackViewWidth / (InitialSpaceBetweenIndicators + LabelSize));
 
@@ -55,7 +69,6 @@ namespace PlaytestingReviewer.Editors
                 if (i == 0)
                 {
                     indicator.style.paddingLeft = 0;
-
                     indicator.style.marginLeft = 0;
                 }
                 else
@@ -70,7 +83,6 @@ namespace PlaytestingReviewer.Editors
 
             UpdateTimeIndicators();
         }
-
 
         private void UpdateTimeIndicators()
         {
@@ -88,10 +100,22 @@ namespace PlaytestingReviewer.Editors
             string[] labels = new string[indicatorCount];
             for (int i = 0; i < indicatorCount; i++)
             {
-                float t = (float)i / (indicatorCount - 1);
-                labels[i] = Mathf.Lerp(0, videoLength, t).ToString("0.0");
+                float normalizedIndex = (float)i / (indicatorCount - 1);
+                labels[i] = Mathf.Round(Mathf.Lerp(0, videoLength, normalizedIndex) * 10) / 10f + "s";
             }
             return labels;
+        }
+        
+        //User interaction
+        private void OnMouseDown(MouseDownEvent evt)
+        {
+            if (evt.button == 0) //left click
+            {
+                Vector2 mousePosition = evt.mousePosition;
+                float time = GetTimeFromScreenX(mousePosition.x);
+                int targetFrame = Mathf.FloorToInt(time * _videoPlayer.GetVideoLengthFrames() / _videoLength); //find the frame closest to the mouse position
+                _videoPlayer.SetFrame(targetFrame);
+            }
         }
 
         private void ZoomTimeIndicators(float amount)
@@ -105,12 +129,8 @@ namespace PlaytestingReviewer.Editors
             }
         }
 
-        public float GetStartLabelPosition()
-        {
-            return _timeIndicators[0].resolvedStyle.marginLeft;
-        }
-
-        public float GetLeftWorldPositionOfTime(float time)
+        //Time calculations
+        public float GetXPositionFromTime(float time)
         {
             if (_timeIndicators == null) { return 0; }
             float initialLabel = _timeIndicators[0].worldBound.x;
@@ -118,7 +138,7 @@ namespace PlaytestingReviewer.Editors
 
             float lastLabel = _timeIndicators[_timeIndicators.Count - 1].worldBound.x;
             float videoLength = _videoLength;
-            return Mathf.Lerp(initialLabel, lastLabel, time / videoLength);
+            return Mathf.Lerp(initialLabel, lastLabel, time / videoLength); // Map the time to the screen
         }
 
         public float GetTimeFromScreenX(float x)
@@ -132,22 +152,13 @@ namespace PlaytestingReviewer.Editors
             // Map the normalized position to the video length
             return Mathf.Lerp(0, videoLength, normalizedPosition);
         }
-
-        private void OnMouseDown(MouseDownEvent evt)
-        {
-            if (evt.button == 0)
-            {
-                Vector2 mousePosition = evt.mousePosition;
-                float time = GetTimeFromScreenX(mousePosition.x);
-                int targetFrame = Mathf.FloorToInt(time * _videoPlayer.GetVideoLengthFrames() / _videoLength);
-                _videoPlayer.SetFrame(targetFrame);
-            }
-        }
+        
+        //Utility
         public bool IsSetupComplete()
         {
             if (_timeIndicators == null || _timeIndicators.Count == 0) { return false; }
-
-            if (_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) { return false; }
+            // if there is no video initialized then the labels will overlap
+            if (_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) { return false; } //
 
             return true;
         }
