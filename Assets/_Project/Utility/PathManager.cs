@@ -14,7 +14,7 @@ namespace PlaytestingReviewer
 
         public static readonly string ImageVideoLoadedPath = "Assets/_Project/Textures/videoLoaded.png";
 
-        public static readonly string PlaytestReviewerUXMLPath = "Assets/_Project/Editor/PlaytestReviewer.uxml";
+        public static readonly string PlaytestReviewerUxmlPath = "Assets/_Project/Editor/PlaytestReviewer.uxml";
         public static readonly string PlaytestReviewerUSSPath = "Assets/_Project/Editor/PlaytestReviewer.uss";
         public static readonly string VideoPreviewIcon = "Assets/_Project/Icons/VideoPreviewIcon.png";
         public static readonly string MetricIcon = Application.streamingAssetsPath + "/MetricIcon";

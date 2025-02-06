@@ -237,9 +237,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c89eb63f74406bbe1736b6f5a42cb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnColorChange:
-    m_PersistentCalls:
-      m_Calls: []
   moveSpeed: 5
   _spriteRenderer: {fileID: 0}
   _currentColor: {r: 0, g: 0, b: 0, a: 0}
@@ -397,6 +394,7 @@ MonoBehaviour:
   width: 1280
   height: 720
   targetFramerate: 30
+  writeBufferThreshold: 30
   outputPath: 
   outputFileName: 
   captureOnStart: 1
@@ -432,15 +430,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   metricName: OnColorChanged
+  metricColor: {r: 0.9169811, g: 0.74152, b: 0.30969733, a: 1}
   _eventSource: {fileID: 949445345}
-  _eventName: OnColorChange
-  _propertiesToTrack:
-  - targetObject: {fileID: 949445345}
-    propertyName: audio
-  - targetObject: {fileID: 949445345}
-    propertyName: moveSpeed
-  - targetObject: {fileID: 949445345}
-    propertyName: moveSpeed
+  _eventName: OnColorChangeAction
+  _propertiesToTrack: []
 --- !u!4 &1567287861
 Transform:
   m_ObjectHideFlags: 0

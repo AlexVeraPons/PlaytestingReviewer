@@ -10,13 +10,15 @@ namespace PlaytestingReviewer.Video
     [UxmlElement]
     public partial class UIVideoPlayer : VisualElement, IVideoPlayer
     {
-        private string _defaultImagePath = PathManager.DefaultImagePath;
-        private string _imageVideoLoadedPath = PathManager.ImageVideoLoadedPath;
+        
+        private readonly string _defaultImagePath = PathManager.DefaultImagePath;
+        private readonly string _imageVideoLoadedPath = PathManager.ImageVideoLoadedPath;
 
-        private VisualElement _videoContainer;
-        private Image _videoRenderer;
-        private UnityEngine.Video.VideoPlayer _videoPlayer;
+        private readonly Image _videoRenderer;
         private RenderTexture _renderTexture;
+        
+        private UnityEngine.Video.VideoPlayer _videoPlayer;
+        
         private float _currentTime = 0;
 
         public UIVideoPlayer()
@@ -24,17 +26,16 @@ namespace PlaytestingReviewer.Video
             style.flexDirection = FlexDirection.Row;
             style.flexGrow = 1;
 
-            _videoContainer = new VisualElement();
-            _videoContainer.style.alignItems = Align.FlexStart;
-            _videoContainer.style.flexGrow = 0;
+            var videoContainer = new VisualElement();
+            videoContainer.style.alignItems = Align.FlexStart;
+            videoContainer.style.flexGrow = 0;
 
-
-            Add(_videoContainer);
+            Add(videoContainer);
 
             _videoRenderer = new Image();
             _videoRenderer.image = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
-            _videoContainer.Add(_videoRenderer);
-            _videoContainer.style.alignSelf = Align.FlexStart;
+            videoContainer.Add(_videoRenderer);
+            videoContainer.style.alignSelf = Align.FlexStart;
 
 
             var defaultTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
@@ -148,8 +149,7 @@ namespace PlaytestingReviewer.Video
             return (float)_videoPlayer.length;
         }
 
-
-        public void UpdateVideoFrame()
+        private void UpdateVideoFrame()
         {
             _videoPlayer.skipOnDrop = true;
             if (_videoPlayer.isPlaying == false)

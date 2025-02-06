@@ -45,6 +45,7 @@ namespace PlaytestingReviewer.Editors
             _initialized = true;
             InformationContainer.style.position = Position.Relative;
             DescriptionLabel.text = _track.name;
+            ChangeBarColor(_track.color);
             CreateTimeMarkers();
         }
 

@@ -20,6 +20,7 @@ namespace PlaytestingReviewer.Editors
         protected VisualElement DescriptionRoot;
         protected VisualElement InformationContainer;
         protected VisualElement DescriptionContainer;
+        private VisualElement _coloredBar;
 
         protected float TrackHeight = 40;
 
@@ -158,7 +159,7 @@ namespace PlaytestingReviewer.Editors
             };
 
 
-            var bar = new VisualElement
+             _coloredBar = new VisualElement
             {
                 style =
                 {
@@ -170,7 +171,7 @@ namespace PlaytestingReviewer.Editors
                     borderTopLeftRadius = 6
                 }
             };
-            DescriptionContainer.Add(bar);
+            DescriptionContainer.Add(_coloredBar);
 
             var spacerElement = new VisualElement
             {
@@ -309,6 +310,12 @@ namespace PlaytestingReviewer.Editors
         public void SetTrackIcon(Texture2D image)
         {
             _imageContainer.style.backgroundImage = image;
+        }
+
+        protected void ChangeBarColor(Color color)
+        {
+            BarColor = color;
+            _coloredBar.style.backgroundColor = BarColor;
         }
     }
 }
