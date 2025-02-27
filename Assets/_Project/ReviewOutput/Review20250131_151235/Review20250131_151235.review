@@ -1,0 +1,75 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "0.7000002"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.533333"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "2.066666"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "2.466666"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

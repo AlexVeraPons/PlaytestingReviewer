@@ -1,0 +1,83 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.399997"
+                        },
+                        {
+                            "key": "transform",
+                            "value": "Circle (UnityEngine.Transform)"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.699994"
+                        },
+                        {
+                            "key": "transform",
+                            "value": "Circle (UnityEngine.Transform)"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "12.00005"
+                        },
+                        {
+                            "key": "transform",
+                            "value": "Circle (UnityEngine.Transform)"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        },
+                        {
+                            "key": "moveSpeed",
+                            "value": "PlaytestingReviewer.Other.CircleReaction"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
