@@ -8,21 +8,17 @@ using System.Threading.Tasks;
 
 namespace PlaytestingReviewer.Editors
 {
-    /// <summary>
-    /// A track that creates preview images so the user can see images that represent what the video will
-    /// look like when the time is reached
-    /// </summary>
     public class VideoPreviewTrack : UITrack
     {
         private readonly IVideoPlayer _videoPlayer;
 
         private const int PixelHeight = 55;
         private const int PixelWidth = 80;
-        
-        private readonly List<Image> _previews;
+        private readonly List<Image> _previews = new List<Image>();
 
         private bool _inNeedOfImages = false;
         private bool _isRefreshing = false;
+
         private bool _awaitingRefresh = false;
         private float _timeSinceLastRequest = 0f;
         private const float RefreshDelay = 0.5f;
@@ -43,12 +39,13 @@ namespace PlaytestingReviewer.Editors
             base.PreInitialization();
 
             TrackHeight = 60;
-            Title = "VideoPreview"; 
+            Title = "VideoPreview";
             OnResize += Resized;
             ResizeDebounceDuration = 2f;
         }
-        
-        private void Resized()
+
+
+        protected void Resized()
         {
             int amountOfPreviews = (int)InformationContainer.resolvedStyle.width / PixelWidth;
 
@@ -78,11 +75,6 @@ namespace PlaytestingReviewer.Editors
         {
             base.TrackUpdate();
 
-            CheckIfRefreshNeeded();
-        }
-
-        private void CheckIfRefreshNeeded()
-        {
             if (_inNeedOfImages && TimeRelations.IsSetupComplete() && !_isRefreshing)
             {
                 _awaitingRefresh = true;
@@ -122,13 +114,6 @@ namespace PlaytestingReviewer.Editors
                 times,
                 "previewBatch");
 
-            CreateFrames(framePaths);
-
-            _isRefreshing = false;
-        }
-
-        private void CreateFrames(List<string> framePaths)
-        {
             for (int i = 0; i < framePaths.Count; i++)
             {
                 string filePath = framePaths[i];
@@ -144,6 +129,8 @@ namespace PlaytestingReviewer.Editors
 
                 File.Delete(filePath);
             }
+
+            _isRefreshing = false;
         }
     }
 }

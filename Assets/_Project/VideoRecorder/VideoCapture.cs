@@ -3,16 +3,17 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 
 namespace PlaytestingReviewer.Video
 {
     public class VideoCapture : MonoBehaviour
     {
-        [Header("Camera & Capture Settings")] 
-        public Camera captureCamera;
-        private Camera _mainCamera;
+        [Header("Camera & Capture Settings")] public Camera captureCamera;
+        private Camera mainCamera;
 
         public int width = 1280;
         public int height = 720;
@@ -21,11 +22,8 @@ namespace PlaytestingReviewer.Video
         // Adjust this to control how many frames to buffer before writing.
         // Lower = less memory usage but more frequent disk writes.
         // Higher = potentially better performance but uses more memory.
-        [Tooltip("Adjust this to control how many frames to buffer before writing.")]
-        [SerializeField] private int writeBufferThreshold = 30;
-
-        [Header("Capture Conditions")]
-        [SerializeField] private bool captureOnStart = true;
+        [Tooltip("Adjust this to control how many frames to buffer before writing.")] [SerializeField]
+        private int writeBufferThreshold = 30;
 
         private string _ffmpegPath = PathManager.FFmpegPath;
         private static string FfmpegExePath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
@@ -41,32 +39,41 @@ namespace PlaytestingReviewer.Video
         private string _folderPath;
         private int _frameCount;
 
-        public string outputPath;
-        public string outputFileName;
-
-        public float CurrentVideoTime { get; private set; } = 0f;
+        [HideInInspector] public string outputPath;
+        [HideInInspector] public string outputFileName;
 
 
+        private float _currentVideoTime = 0f;
+        public float CurrentVideoTime => _currentVideoTime;
+
+        [Header("Capture Conditions")] [SerializeField]
+        private bool captureOnStart = false;
+
+        /// <summary>
+        /// Simple container for storing the frame data in memory.
+        /// </summary>
         private class FrameData
         {
-            public byte[] Data;
-            public string FileName;
+            public byte[] data;
+            public string fileName;
         }
-        private readonly List<FrameData> frameBuffer = new List<FrameData>();
+
+        // Buffer to hold frames before writing to disk
+        private List<FrameData> frameBuffer = new List<FrameData>();
 
         void Start()
         {
             _ffmpegPath = FfmpegExePath;
-            _mainCamera = Camera.main;
+            mainCamera = Camera.main;
 
             if (captureCamera == null)
             {
                 GameObject captureCamObj = new GameObject("HiddenCaptureCamera");
                 captureCamera = captureCamObj.AddComponent<Camera>();
 
-                if (_mainCamera != null)
+                if (mainCamera != null)
                 {
-                    captureCamera.CopyFrom(_mainCamera);
+                    captureCamera.CopyFrom(mainCamera);
                 }
 
                 captureCamera.enabled = false;
@@ -147,7 +154,7 @@ namespace PlaytestingReviewer.Video
                 SyncCaptureCamera();
 
                 _timeSinceLastFrame += Time.deltaTime;
-                
+
                 if (_timeSinceLastFrame >= _captureDeltaTime)
                 {
                     _timeSinceLastFrame -= _captureDeltaTime;
@@ -161,19 +168,19 @@ namespace PlaytestingReviewer.Video
         /// </summary>
         private void SyncCaptureCamera()
         {
-            if (_mainCamera == null || captureCamera == null)
+            if (mainCamera == null || captureCamera == null)
                 return;
 
-            captureCamera.transform.position = _mainCamera.transform.position;
-            captureCamera.transform.rotation = _mainCamera.transform.rotation;
-            captureCamera.fieldOfView = _mainCamera.fieldOfView;
-            captureCamera.orthographic = _mainCamera.orthographic;
-            captureCamera.orthographicSize = _mainCamera.orthographicSize;
-            captureCamera.nearClipPlane = _mainCamera.nearClipPlane;
-            captureCamera.farClipPlane = _mainCamera.farClipPlane;
-            captureCamera.clearFlags = _mainCamera.clearFlags;
-            captureCamera.backgroundColor = _mainCamera.backgroundColor;
-            captureCamera.cullingMask = _mainCamera.cullingMask;
+            captureCamera.transform.position = mainCamera.transform.position;
+            captureCamera.transform.rotation = mainCamera.transform.rotation;
+            captureCamera.fieldOfView = mainCamera.fieldOfView;
+            captureCamera.orthographic = mainCamera.orthographic;
+            captureCamera.orthographicSize = mainCamera.orthographicSize;
+            captureCamera.nearClipPlane = mainCamera.nearClipPlane;
+            captureCamera.farClipPlane = mainCamera.farClipPlane;
+            captureCamera.clearFlags = mainCamera.clearFlags;
+            captureCamera.backgroundColor = mainCamera.backgroundColor;
+            captureCamera.cullingMask = mainCamera.cullingMask;
         }
 
         private void CaptureFrame()
@@ -198,12 +205,12 @@ namespace PlaytestingReviewer.Video
             // Store in buffer instead of writing immediately
             frameBuffer.Add(new FrameData
             {
-                Data = jpgData,
-                FileName = fileName
+                data = jpgData,
+                fileName = fileName
             });
 
             _frameCount++;
-            CurrentVideoTime += _captureDeltaTime;
+            _currentVideoTime += _captureDeltaTime;
 
             // If we've reached the threshold, flush to disk
             if (frameBuffer.Count >= writeBufferThreshold)
@@ -219,9 +226,10 @@ namespace PlaytestingReviewer.Video
         {
             foreach (var frame in frameBuffer)
             {
-                string filePath = Path.Combine(_folderPath, frame.FileName);
-                File.WriteAllBytes(filePath, frame.Data);
+                string filePath = Path.Combine(_folderPath, frame.fileName);
+                File.WriteAllBytes(filePath, frame.data);
             }
+
             frameBuffer.Clear();
         }
 
@@ -243,7 +251,6 @@ namespace PlaytestingReviewer.Video
                 ? Path.Combine(outputPath, outFileName)
                 : Path.Combine(PathManager.VideoOutputPath, outFileName);
 
-            // Use .jpg as the input sequence
             string args = $"-y -framerate {targetFramerate} -i \"{Path.Combine(_folderPath, "frame_%04d.jpg")}\" " +
                           $"-c:v libx264 -pix_fmt yuv420p \"{outFilePath}\"";
 
@@ -286,6 +293,7 @@ namespace PlaytestingReviewer.Video
                 Debug.LogWarning($"Failed to delete frames folder: {e.Message}");
             }
 
+            AssetDatabase.Refresh();
             yield return null;
         }
     }

@@ -72,9 +72,14 @@ namespace PlaytestingReviewer.Tracks
             reviewObject.tracksPath =reviewObjectTracksPath;
             reviewObject.videoPath =_folderPath + "/" + _folderName + ".mp4";            
 
-            //save the asset into the folder
             AssetDatabase.CreateAsset(reviewObject, _folderPath + "/"+"Review.asset");
             AssetDatabase.SaveAssets();
+
+            DeleteFolder();
+        }
+
+        private void DeleteFolder()
+        {
         }
     }
 }
