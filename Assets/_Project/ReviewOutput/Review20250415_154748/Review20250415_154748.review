@@ -1,0 +1,65 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "color": {
+                "r": 0.9169811010360718,
+                "g": 0.7415199875831604,
+                "b": 0.30969732999801638,
+                "a": 1.0
+            },
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.466667"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.766666"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.199996"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.466663"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.833328"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "10.03335"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -5,6 +5,12 @@ using UnityEngine.UIElements;
 
 namespace PlaytestingReviewer.Editors
 {
+    /// <summary>
+    /// provides a custom Unity Editor Window for reviewing playtest sessions.
+    /// It integrates video playback, timeline control, and track management to facilitate analysis.
+    /// This tool allows users to load a recorded playtest session, inspect different event tracks
+    /// and interact with a time-based representation of the session.
+    /// </summary>
     public class PlaytestReviewerEditor : EditorWindow
     {
         private readonly string _ussPath = PathManager.PlaytestReviewerUSSPath;
@@ -29,7 +35,6 @@ namespace PlaytestingReviewer.Editors
         public void CreateGUI()
         {
             InitializeUI();
-            LoadStyleSheet();
             InitializeControllers();
         }
 
@@ -37,17 +42,6 @@ namespace PlaytestingReviewer.Editors
         {
             var root = visualTree.CloneTree();
             rootVisualElement.Add(root);
-        }
-
-        private void LoadStyleSheet()
-        {
-            // var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(_ussPath);
-            // if (styleSheet == null)
-            // {
-            //     Debug.LogError($"Failed to load USS at path: {_ussPath}");
-            //     return;
-            // }
-            // rootVisualElement.styleSheets.Add(styleSheet);
         }
 
         private void InitializeControllers()
@@ -89,8 +83,8 @@ namespace PlaytestingReviewer.Editors
             PopulateTracks(review.GetTrackCollecion());
             InitializeVideo(review.videoPath);
 
-            Label name = rootVisualElement.Q<Label>("RecordingName");
-            name.text = review.name;
+            Label nameLabel = rootVisualElement.Q<Label>("RecordingName");
+            nameLabel.text = review.name;
         }
 
         private void InitializeVideo(string path)

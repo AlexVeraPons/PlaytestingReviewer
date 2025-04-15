@@ -72,7 +72,17 @@ namespace PlaytestingReviewer.Video
         /// Get the current frame of the video
         /// </summary>
         int GetCurrentFrame();
+
+        /// <summary>
+        /// Get the path of the currently loaded video
+        /// </summary>
+        /// <returns>Returns the file path of the video as a string</returns>
         string GetVideoPath();
+
+        /// <summary>
+        /// Sets the video file to be used by the video player
+        /// </summary>
+        /// <param name="path">The file path of the video to set</param>
         void SetVideo(string path);
     }
 }

@@ -1,0 +1,265 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "color": {
+                "r": 0.9169811010360718,
+                "g": 0.7415199875831604,
+                "b": 0.30969732999801638,
+                "a": 1.0
+            },
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.099997"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "5.399996"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.533328"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.766661"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "7.96666"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.099995"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.833338"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.000007"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.166676"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "9.366678"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.23337"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "11.2667"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "12.60005"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "13.06673"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "13.2334"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.23341"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.46675"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.66675"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "14.80008"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "16.50009"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "16.66676"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "18.00007"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "18.20007"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "19.50005"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "19.73338"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "21.13335"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "21.30002"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "21.46668"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "22.8"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "22.93333"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "23.09999"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -3,15 +3,16 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 
 namespace PlaytestingReviewer.Video
 {
     public class VideoCapture : MonoBehaviour
     {
-        [Header("Camera & Capture Settings")] 
-        public Camera captureCamera;
+        [Header("Camera & Capture Settings")] public Camera captureCamera;
         private Camera mainCamera;
 
         public int width = 1280;
@@ -21,31 +22,32 @@ namespace PlaytestingReviewer.Video
         // Adjust this to control how many frames to buffer before writing.
         // Lower = less memory usage but more frequent disk writes.
         // Higher = potentially better performance but uses more memory.
-        [Tooltip("Adjust this to control how many frames to buffer before writing.")]
-        [SerializeField] private int writeBufferThreshold = 30;
+        [Tooltip("Adjust this to control how many frames to buffer before writing.")] [SerializeField]
+        private int writeBufferThreshold = 30;
 
-        private string ffmpegPath = PathManager.FFmpegPath;
-        private string ffmpegExePath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
+        private string _ffmpegPath = PathManager.FFmpegPath;
+        private static string FfmpegExePath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
 
-        private RenderTexture renderTexture;
-        private Texture2D readTexture;
+        private RenderTexture _renderTexture;
+        private Texture2D _readTexture;
 
-        private bool isCapturing = false;
-        public bool IsCapturing => isCapturing;
-        private float captureDeltaTime;
-        private float timeSinceLastFrame;
+        private bool _isCapturing = false;
+        public bool IsCapturing => _isCapturing;
+        private float _captureDeltaTime;
+        private float _timeSinceLastFrame;
 
-        private string folderPath;
-        private int frameCount;
+        private string _folderPath;
+        private int _frameCount;
 
-        public string outputPath;
-        public string outputFileName;
+        [HideInInspector] public string outputPath;
+        [HideInInspector] public string outputFileName;
+
 
         private float _currentVideoTime = 0f;
-        public float currentVideoTime => _currentVideoTime;
+        public float CurrentVideoTime => _currentVideoTime;
 
-        [Header("Capture Conditions")]
-        [SerializeField] private bool captureOnStart = false;
+        [Header("Capture Conditions")] [SerializeField]
+        private bool captureOnStart = false;
 
         /// <summary>
         /// Simple container for storing the frame data in memory.
@@ -61,7 +63,7 @@ namespace PlaytestingReviewer.Video
 
         void Start()
         {
-            ffmpegPath = ffmpegExePath;
+            _ffmpegPath = FfmpegExePath;
             mainCamera = Camera.main;
 
             if (captureCamera == null)
@@ -85,7 +87,7 @@ namespace PlaytestingReviewer.Video
 
         void OnApplicationQuit()
         {
-            if (isCapturing)
+            if (_isCapturing)
             {
                 StopCapture();
             }
@@ -93,53 +95,53 @@ namespace PlaytestingReviewer.Video
 
         public void StartCapture()
         {
-            if (isCapturing)
+            if (_isCapturing)
             {
                 Debug.LogWarning("Already capturing!");
                 return;
             }
 
-            folderPath = Path.Combine(Application.dataPath,
+            _folderPath = Path.Combine(Application.dataPath,
                 "RecordedFrames_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-            Directory.CreateDirectory(folderPath);
-            frameCount = 0;
+            Directory.CreateDirectory(_folderPath);
+            _frameCount = 0;
 
-            renderTexture = new RenderTexture(width, height, 24);
-            renderTexture.Create();
+            _renderTexture = new RenderTexture(width, height, 24);
+            _renderTexture.Create();
 
-            readTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
+            _readTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
 
-            captureDeltaTime = 1f / targetFramerate;
-            timeSinceLastFrame = 0f;
+            _captureDeltaTime = 1f / targetFramerate;
+            _timeSinceLastFrame = 0f;
 
-            isCapturing = true;
-            Debug.Log("Capture started. Saving frames to: " + folderPath);
+            _isCapturing = true;
+            Debug.Log("Capture started. Saving frames to: " + _folderPath);
         }
 
         public void StopCapture()
         {
-            if (!isCapturing)
+            if (!_isCapturing)
             {
                 Debug.LogWarning("Not currently capturing!");
                 return;
             }
 
-            isCapturing = false;
+            _isCapturing = false;
 
             // Ensure any buffered frames get written
             FlushBufferToDisk();
 
-            if (renderTexture != null)
+            if (_renderTexture != null)
             {
-                renderTexture.Release();
-                Destroy(renderTexture);
-                renderTexture = null;
+                _renderTexture.Release();
+                Destroy(_renderTexture);
+                _renderTexture = null;
             }
 
-            if (readTexture != null)
+            if (_readTexture != null)
             {
-                Destroy(readTexture);
-                readTexture = null;
+                Destroy(_readTexture);
+                _readTexture = null;
             }
 
             StartCoroutine(EncodeToMP4());
@@ -147,15 +149,15 @@ namespace PlaytestingReviewer.Video
 
         void LateUpdate()
         {
-            if (isCapturing)
+            if (_isCapturing)
             {
                 SyncCaptureCamera();
 
-                timeSinceLastFrame += Time.deltaTime;
-                
-                if (timeSinceLastFrame >= captureDeltaTime)
+                _timeSinceLastFrame += Time.deltaTime;
+
+                if (_timeSinceLastFrame >= _captureDeltaTime)
                 {
-                    timeSinceLastFrame -= captureDeltaTime;
+                    _timeSinceLastFrame -= _captureDeltaTime;
                     CaptureFrame();
                 }
             }
@@ -186,19 +188,19 @@ namespace PlaytestingReviewer.Video
             RenderTexture prevTarget = captureCamera.targetTexture;
             RenderTexture prevActive = RenderTexture.active;
 
-            captureCamera.targetTexture = renderTexture;
-            RenderTexture.active = renderTexture;
+            captureCamera.targetTexture = _renderTexture;
+            RenderTexture.active = _renderTexture;
 
             captureCamera.Render();
 
-            readTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-            readTexture.Apply();
+            _readTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            _readTexture.Apply();
 
             captureCamera.targetTexture = prevTarget;
             RenderTexture.active = prevActive;
 
-            byte[] jpgData = readTexture.EncodeToJPG(90);
-            string fileName = $"frame_{frameCount:D04}.jpg";
+            byte[] jpgData = _readTexture.EncodeToJPG(90);
+            string fileName = $"frame_{_frameCount:D04}.jpg";
 
             // Store in buffer instead of writing immediately
             frameBuffer.Add(new FrameData
@@ -207,8 +209,8 @@ namespace PlaytestingReviewer.Video
                 fileName = fileName
             });
 
-            frameCount++;
-            _currentVideoTime += captureDeltaTime;
+            _frameCount++;
+            _currentVideoTime += _captureDeltaTime;
 
             // If we've reached the threshold, flush to disk
             if (frameBuffer.Count >= writeBufferThreshold)
@@ -224,9 +226,10 @@ namespace PlaytestingReviewer.Video
         {
             foreach (var frame in frameBuffer)
             {
-                string filePath = Path.Combine(folderPath, frame.fileName);
+                string filePath = Path.Combine(_folderPath, frame.fileName);
                 File.WriteAllBytes(filePath, frame.data);
             }
+
             frameBuffer.Clear();
         }
 
@@ -234,7 +237,7 @@ namespace PlaytestingReviewer.Video
         {
             Debug.Log("Starting FFmpeg encode...");
 
-            if (frameCount < 1)
+            if (_frameCount < 1)
             {
                 Debug.LogWarning("No frames captured. Skipping FFmpeg.");
                 yield break;
@@ -248,13 +251,12 @@ namespace PlaytestingReviewer.Video
                 ? Path.Combine(outputPath, outFileName)
                 : Path.Combine(PathManager.VideoOutputPath, outFileName);
 
-            // Use .jpg as the input sequence
-            string args = $"-y -framerate {targetFramerate} -i \"{Path.Combine(folderPath, "frame_%04d.jpg")}\" " +
+            string args = $"-y -framerate {targetFramerate} -i \"{Path.Combine(_folderPath, "frame_%04d.jpg")}\" " +
                           $"-c:v libx264 -pix_fmt yuv420p \"{outFilePath}\"";
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = ffmpegPath,
+                FileName = _ffmpegPath,
                 Arguments = args,
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -283,14 +285,15 @@ namespace PlaytestingReviewer.Video
 
             try
             {
-                Directory.Delete(folderPath, true);
-                Debug.Log($"Deleted temporary frames folder: {folderPath}");
+                Directory.Delete(_folderPath, true);
+                Debug.Log($"Deleted temporary frames folder: {_folderPath}");
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"Failed to delete frames folder: {e.Message}");
             }
 
+            AssetDatabase.Refresh();
             yield return null;
         }
     }

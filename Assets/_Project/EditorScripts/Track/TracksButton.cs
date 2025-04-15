@@ -8,10 +8,10 @@ namespace PlaytestingReviewer.Editors
     public class TracksButton
     {
         private TrackCollection _trackCollection;
-        private VisualElement _descriptionContainer;
-        private VisualElement _informationContainer;
-        private ITimePositionTranslator _time;
-        private VisualElement _adaptToWidth;
+        private readonly VisualElement _descriptionContainer;
+        private readonly VisualElement _informationContainer;
+        private readonly ITimePositionTranslator _time;
+        private readonly VisualElement _adaptToWidth;
 
         public TracksButton(Button button,
         VisualElement descriptionContainer,

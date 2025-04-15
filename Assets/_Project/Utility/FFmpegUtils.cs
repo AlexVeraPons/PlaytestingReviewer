@@ -51,6 +51,7 @@ namespace PlaytestingReviewer
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -63,7 +64,7 @@ namespace PlaytestingReviewer
         /// <param name="timeInSeconds">Time (in seconds) from which to extract the frame.</param>
         /// <param name="id">String identifier to help name the extracted frame.</param>
         /// <returns>The file path of the extracted frame if successful; otherwise null.</returns>
-        public static async Task<string> ExtractFrameAsync(string videoPath, float timeInSeconds, string id)
+        private static async Task<string> ExtractFrameAsync(string videoPath, float timeInSeconds, string id)
         {
             string outFileName = $"ExtractedFrame_{id}.png";
             string outFilePath = Path.Combine(PathManager.FrameOutputPath, outFileName);
@@ -72,13 +73,11 @@ namespace PlaytestingReviewer
                 ExtractFrameInternal(videoPath, timeInSeconds, outFilePath)
             );
 
-            if (success)
-            {
-                FrameFromVideoReady?.Invoke(outFilePath);
-                return outFilePath;
-            }
+            if (!success) return null;
+            
+            FrameFromVideoReady?.Invoke(outFilePath);
+            return outFilePath;
 
-            return null;
         }
 
         /// <summary>
@@ -105,7 +104,6 @@ namespace PlaytestingReviewer
                 tasks.Add(ExtractFrameAsync(videoPath, time, frameId));
             }
 
-            // Wait until all extractions complete
             string[] results = await Task.WhenAll(tasks);
 
             // Filter out any nulls

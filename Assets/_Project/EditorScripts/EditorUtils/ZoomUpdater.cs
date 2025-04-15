@@ -6,55 +6,63 @@ using Debug = UnityEngine.Debug;
 
 namespace PlaytestingReviewer.Editors
 {
+    /// <summary>
+    /// Handles zoom interactions using the mouse wheel while holding Ctrl.
+    /// </summary>
     public class ZoomUpdater
     {
+        // Action
         public Action<float> OnZoomed;
-        private float _initialZoomAmmount = 0f;
-        public float InitialZoomAmmount => _initialZoomAmmount;
-        private float _currentZoomAmmount = 0f;
-        public float CurrentZoomAmmount => _currentZoomAmmount;
+        
+        // class values
+        private readonly float _initialZoomAmount = 0f;
+        private float _currentZoomAmount = 0f;
+        private float _maxZoomAmount = 70f;
+        private float _minZoomAmount = -10f;
+        private float _zoomModifier = 1f;
 
-        private float _maxZoomAmmount = 70f;
-        private float _minZoomAmmount = -10f;
-
-        private float _ZoomModifier = 1f;
-
-        public ZoomUpdater() {_currentZoomAmmount = _initialZoomAmmount;} 
+        public ZoomUpdater()
+        {
+            _currentZoomAmount = _initialZoomAmount;
+        }
 
         public void SubscribeToZoom(VisualElement element)
         {
             element.RegisterCallback<WheelEvent>(OnMouseZoom);
         }
 
-        public void SetZoomLimits(float minZoomAmmount, float maxZoomAmmount)
-        {
-            _minZoomAmmount = minZoomAmmount;
-            _maxZoomAmmount = maxZoomAmmount;
-        }
-
-        public void SetZoomModifier(float modifier)
-        {
-            _ZoomModifier = modifier;
-        }
-
         private void OnMouseZoom(WheelEvent evt)
         {
-            if (evt.ctrlKey == false) { return; }
-
-            _currentZoomAmmount += evt.delta.y * _ZoomModifier;
-
-            if (_currentZoomAmmount > _maxZoomAmmount)
+            if (evt.ctrlKey == false) // only zoom when holding ctrl
             {
-                _currentZoomAmmount = _maxZoomAmmount;
+                return;
             }
-            else if (_currentZoomAmmount < _minZoomAmmount)
+
+            _currentZoomAmount += evt.delta.y * _zoomModifier;
+
+            if (_currentZoomAmount > _maxZoomAmount)
             {
-                _currentZoomAmmount = _minZoomAmmount;
+                _currentZoomAmount = _maxZoomAmount;
+            }
+            else if (_currentZoomAmount < _minZoomAmount)
+            {
+                _currentZoomAmount = _minZoomAmount;
             }
             else
             {
                 OnZoomed?.Invoke(evt.delta.y);
             }
+        }
+        
+        public void SetZoomLimits(float minZoomAmount, float maxZoomAmount)
+        {
+            _minZoomAmount = minZoomAmount;
+            _maxZoomAmount = maxZoomAmount;
+        }
+
+        public void SetZoomModifier(float modifier)
+        {
+            _zoomModifier = modifier;
         }
     }
 }

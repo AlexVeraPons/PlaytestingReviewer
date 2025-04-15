@@ -13,6 +13,7 @@ namespace PlaytestingReviewer.Tracks
     public class MetricRecorder : MonoBehaviour
     {
         public string metricName = "Metric";
+        public Color metricColor = Color.red;
 
         [SerializeField] private MonoBehaviour _eventSource; // The MonoBehaviour holding the event
         [SerializeField] private string _eventName; // The name of the event/delegate/UnityEvent to track
@@ -32,7 +33,7 @@ namespace PlaytestingReviewer.Tracks
         private Delegate _systemActionDelegate; // The compiled delegate attached to the field
 
         private float _selfCurrentTime = 0f;
-        private float _currentTime => _videoCapture == null ? _selfCurrentTime : _videoCapture.currentVideoTime;
+        private float _currentTime => _videoCapture == null ? _selfCurrentTime : _videoCapture.CurrentVideoTime;
 
         private VideoCapture _videoCapture;
 
@@ -45,7 +46,6 @@ namespace PlaytestingReviewer.Tracks
 
         private void Update()
         {
-            // If there's no video capture in the scene, increment local time.
             if (_videoCapture == null)
             {
                 _selfCurrentTime += Time.deltaTime;
@@ -58,6 +58,7 @@ namespace PlaytestingReviewer.Tracks
             {
                 type = TrackType.Metric,
                 name = metricName,
+                color = metricColor,
                 iconName = "DefaultIcon",
                 instances = new List<SerializableDictionary>()
             };
@@ -72,25 +73,21 @@ namespace PlaytestingReviewer.Tracks
             if (_eventSource == null || string.IsNullOrEmpty(_eventName))
                 return;
 
-            // Include both instance and static members.
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-            // 1) Try to find a C# event first.
+            // Try to find a C# event first.
             _dotNetEvent = _eventSource.GetType().GetEvent(_eventName, flags);
             if (_dotNetEvent != null)
             {
                 Type eventHandlerType = _dotNetEvent.EventHandlerType;
-                // Create a delegate that calls LogEvent() (ignores parameters).
                 _eventDelegate = CreateDelegateForEvent(eventHandlerType);
 
-                // Check if the event is static. For static events, pass null as the target.
                 bool isStatic = _dotNetEvent.GetAddMethod().IsStatic;
                 object target = isStatic ? null : _eventSource;
                 _dotNetEvent.AddEventHandler(target, _eventDelegate);
                 return;
             }
 
-            // 2) If not a C# event, check for a UnityEvent field.
             _unityEventField = _eventSource.GetType().GetField(_eventName, flags);
             if (_unityEventField != null && typeof(UnityEventBase).IsAssignableFrom(_unityEventField.FieldType))
             {
@@ -109,14 +106,11 @@ namespace PlaytestingReviewer.Tracks
                 return;
             }
 
-            // 3) Finally, if not a standard .NET event or UnityEvent, see if it's a delegate field (e.g. System.Action).
             _systemActionField = _eventSource.GetType().GetField(_eventName, flags);
             if (_systemActionField != null && typeof(Delegate).IsAssignableFrom(_systemActionField.FieldType))
             {
-                // Create a delegate that calls LogEvent() ignoring parameters (if generic).
                 _systemActionDelegate = CreateDelegateForEvent(_systemActionField.FieldType);
 
-                // Combine it with any existing delegate in that field.
                 Delegate existing = _systemActionField.GetValue(_eventSource) as Delegate;
                 Delegate combined = Delegate.Combine(existing, _systemActionDelegate);
                 _systemActionField.SetValue(_eventSource, combined);
@@ -131,22 +125,17 @@ namespace PlaytestingReviewer.Tracks
         /// <returns>A delegate of the given type that calls LogEvent().</returns>
         private Delegate CreateDelegateForEvent(Type delegateType)
         {
-            // Retrieve the method signature of the delegate.
             MethodInfo invokeMethod = delegateType.GetMethod("Invoke");
             ParameterInfo[] parameters = invokeMethod.GetParameters();
 
-            // Create parameter expressions matching the delegate's parameters.
             ParameterExpression[] paramExpressions =
                 parameters.Select(p => Expression.Parameter(p.ParameterType, p.Name)).ToArray();
 
-            // Get the LogEvent() method (private instance method).
             MethodInfo logEventMethod = typeof(MetricRecorder)
                 .GetMethod(nameof(LogEvent), BindingFlags.NonPublic | BindingFlags.Instance);
 
-            // Expression to call LogEvent().
             Expression callLogEvent = Expression.Call(Expression.Constant(this), logEventMethod);
 
-            // Build a lambda expression with the appropriate signature that calls LogEvent.
             var lambda = Expression.Lambda(delegateType, callLogEvent, paramExpressions);
             return lambda.Compile();
         }
@@ -164,7 +153,6 @@ namespace PlaytestingReviewer.Tracks
         /// </summary>
         private void LogEvent()
         {
-            // Create an instance of your serializable dictionary to store event data.
             var instance = new SerializableDictionary();
             instance.Add("time", _currentTime);
 
@@ -176,7 +164,6 @@ namespace PlaytestingReviewer.Tracks
                 {
                     var type = property.targetObject.GetType();
 
-                    // Try getting as a field first (public or non-public)
                     var fieldInfo = type.GetField(
                         property.propertyName,
                         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
@@ -188,7 +175,6 @@ namespace PlaytestingReviewer.Tracks
                     }
                     else
                     {
-                        // Then try as a property (public or non-public)
                         var propInfo = type.GetProperty(
                             property.propertyName,
                             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
@@ -200,8 +186,7 @@ namespace PlaytestingReviewer.Tracks
                         }
                         else
                         {
-                            // If neither a field nor a property is found, fallback
-                            value = property.value;
+                            value = property.Value;
                             Debug.LogWarning(property.propertyName + " was not found in " + property.targetObject +
                                              ".");
                         }
@@ -209,7 +194,7 @@ namespace PlaytestingReviewer.Tracks
                 }
                 else
                 {
-                    value = property.value;
+                    value = property.Value;
                 }
 
                 instance.Add(property.propertyName, value);
@@ -266,7 +251,7 @@ namespace PlaytestingReviewer.Tracks
                 }
             }
 
-            // (2) Delegate field (System.Action) unsubscribe
+            // System Action unsubscribe
             if (_systemActionField != null && _systemActionDelegate != null)
             {
                 Delegate existing = _systemActionField.GetValue(_eventSource) as Delegate;
@@ -298,6 +283,9 @@ namespace PlaytestingReviewer.Tracks
                 // Metric Name
                 SerializedProperty metricNameProp = serializedObject.FindProperty("metricName");
                 EditorGUILayout.PropertyField(metricNameProp, new GUIContent("Metric Name"));
+                
+                SerializedProperty metricColorProp = serializedObject.FindProperty("metricColor");
+                EditorGUILayout.PropertyField(metricColorProp, new GUIContent("Metric Color"));
 
                 EditorGUILayout.Space(5);
 

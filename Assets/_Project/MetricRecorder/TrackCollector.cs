@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace PlaytestingReviewer.Tracks
 {
+    /// <summary>
+    /// Designated to store the tracks from all metric recorders and then is used to create the review object 
+    /// </summary>
     public class TrackCollector : MonoBehaviour
     {
         private List<Track> _tracks = new List<Track>();

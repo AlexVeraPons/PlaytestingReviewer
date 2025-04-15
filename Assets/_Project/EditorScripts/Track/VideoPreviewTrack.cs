@@ -10,14 +10,14 @@ namespace PlaytestingReviewer.Editors
 {
     public class VideoPreviewTrack : UITrack
     {
-        private IVideoPlayer _videoPlayer;
+        private readonly IVideoPlayer _videoPlayer;
 
-        private const int pixelHeight = 55;
-        private const int pixelWidth = 80;
+        private const int PixelHeight = 55;
+        private const int PixelWidth = 80;
         private readonly List<Image> _previews = new List<Image>();
 
         private bool _inNeedOfImages = false;
-        private bool _isRefreshing = false; 
+        private bool _isRefreshing = false;
 
         private bool _awaitingRefresh = false;
         private float _timeSinceLastRequest = 0f;
@@ -31,25 +31,25 @@ namespace PlaytestingReviewer.Editors
             : base(description, information, timeRelations)
         {
             _videoPlayer = videoPlayer;
-            _timeRelations = timeRelations;
+            TimeRelations = timeRelations;
         }
 
-        protected override void Initialization(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
+        protected override void PreInitialization()
         {
-            _trackHeight = 60;
-            _title = "VideoPreview";
-            base.Initialization(description, information, timeRelations);
-            OnResize += Resized;
-            _resizeDebounceDuration = 2f;
+            base.PreInitialization();
 
+            TrackHeight = 60;
+            Title = "VideoPreview";
+            OnResize += Resized;
+            ResizeDebounceDuration = 2f;
         }
 
 
         protected void Resized()
         {
-            int amountOfPreviews = (int)_informationContainer.resolvedStyle.width / pixelWidth;
+            int amountOfPreviews = (int)InformationContainer.resolvedStyle.width / PixelWidth;
 
-            _informationContainer.Clear();
+            InformationContainer.Clear();
             _previews.Clear();
 
             for (int i = 0; i < amountOfPreviews; i++)
@@ -58,13 +58,13 @@ namespace PlaytestingReviewer.Editors
                 {
                     style =
                     {
-                        width = pixelWidth,
-                        height = pixelHeight,
+                        width = PixelWidth,
+                        height = PixelHeight,
                         backgroundColor = new StyleColor(Color.black)
                     }
                 };
 
-                _informationContainer.Add(previewBox);
+                InformationContainer.Add(previewBox);
                 _previews.Add(previewBox);
             }
 
@@ -75,11 +75,11 @@ namespace PlaytestingReviewer.Editors
         {
             base.TrackUpdate();
 
-            if (_inNeedOfImages && _timeRelations.IsSetupComplete() && !_isRefreshing)
+            if (_inNeedOfImages && TimeRelations.IsSetupComplete() && !_isRefreshing)
             {
                 _awaitingRefresh = true;
                 _timeSinceLastRequest = 0f;
-                
+
                 _inNeedOfImages = false;
             }
 
@@ -105,13 +105,13 @@ namespace PlaytestingReviewer.Editors
             var times = new List<float>();
             foreach (var preview in _previews)
             {
-                float time = _timeRelations.GetTimeFromScreenX(preview.worldBound.x);
+                float time = TimeRelations.GetTimeFromScreenX(preview.worldBound.x);
                 times.Add(time);
             }
 
             string videoPath = _videoPlayer.GetVideoPath();
-            var framePaths = await FFmpegUtils.ExtractBatchFramesAsync(videoPath, 
-                times, 
+            var framePaths = await FFmpegUtils.ExtractBatchFramesAsync(videoPath,
+                times,
                 "previewBatch");
 
             for (int i = 0; i < framePaths.Count; i++)
@@ -124,7 +124,7 @@ namespace PlaytestingReviewer.Editors
                 byte[] fileBytes = File.ReadAllBytes(filePath);
                 var texture = new Texture2D(2, 2);
                 texture.LoadImage(fileBytes);
-                if(_previews[i] == null) RefreshPreviewsBatch();
+                if (_previews[i] == null) RefreshPreviewsBatch();
                 _previews[i].style.backgroundImage = new StyleBackground(texture);
 
                 File.Delete(filePath);

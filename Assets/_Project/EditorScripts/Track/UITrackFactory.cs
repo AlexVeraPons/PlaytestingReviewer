@@ -3,6 +3,9 @@ using PlaytestingReviewer.Tracks;
 
 namespace PlaytestingReviewer.Editors
 {
+    /// <summary>
+    /// Provides a factory for creating UI tracks from different track types.
+    /// </summary>
     public static class UITrackFactory
     {
         /// <summary>
@@ -24,9 +27,9 @@ namespace PlaytestingReviewer.Editors
             switch (track.type)
             {
                 case TrackType.Metric:
-                    var metricTrack = new MetricTrack(descriptionContainer, informationContainer, timeTranslator, track);
+                    var metricTrack = new UIMetricTrack(descriptionContainer, informationContainer, timeTranslator, track);
                     metricTrack.AdaptToWidth(adaptToWidth);
-                    metricTrack.StartInitialization();
+                    metricTrack.DelayedConfigureTrack();
                     return metricTrack;
                 default:
                     UnityEngine.Debug.LogError($"Unsupported TrackType: {track.type}");

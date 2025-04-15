@@ -8,10 +8,14 @@ using UnityEditor;
 
 namespace PlaytestingReviewer.Tracks
 {
+    ///<summary>
+    /// Initializes the review output folder and configures the video capture and track collection settings.
+    /// When the object is destroyed, it converts the collected tracks to JSON and creates a Review asset 
+    /// that links the track data and video file for later analysis.
+    /// </summary>
     public class ReviewCreator : MonoBehaviour
     {
         [SerializeField] private TrackCollector _trackCollector;
-
         [SerializeField] private VideoCapture _videoCapture;
 
         private string _folderName;
@@ -62,15 +66,20 @@ namespace PlaytestingReviewer.Tracks
         {
             TrackCollection tracks = _trackCollector.GetTracks();
             string reviewObjectTracksPath = _folderPath + "/" + _folderName + ".review";
-            TrackConverter.TracksToJson(tracks,reviewObjectTracksPath);
+            TrackConverter.OutputTracksToJson(tracks,reviewObjectTracksPath);
             
             Review reviewObject = ScriptableObject.CreateInstance<Review>();
             reviewObject.tracksPath =reviewObjectTracksPath;
             reviewObject.videoPath =_folderPath + "/" + _folderName + ".mp4";            
 
-            //save the asset into the folder
             AssetDatabase.CreateAsset(reviewObject, _folderPath + "/"+"Review.asset");
             AssetDatabase.SaveAssets();
+
+            DeleteFolder();
+        }
+
+        private void DeleteFolder()
+        {
         }
     }
 }

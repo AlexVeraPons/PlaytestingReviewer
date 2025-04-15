@@ -10,7 +10,7 @@ namespace PlaytestingReviewer.Tracks
     {
         public MonoBehaviour targetObject; // The MonoBehaviour to track
         [FormerlySerializedAs("name")] public string propertyName; // The property to extract
-        public object value => targetObject.GetType();
+        public object Value => targetObject.GetType();
 
         public object GetValue()
         {

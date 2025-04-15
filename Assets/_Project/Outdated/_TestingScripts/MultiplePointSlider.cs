@@ -63,7 +63,6 @@ public partial class MultiPointSlider : VisualElement
         }
     }
 
-    // Start dragging the handle
     private void OnHandleDragStart(PointerDownEvent evt, int index)
     {
         this.CapturePointer(evt.pointerId);
@@ -71,7 +70,6 @@ public partial class MultiPointSlider : VisualElement
         RegisterCallback<PointerUpEvent>(e => OnHandleDragEnd(e, index));
     }
 
-    // Drag the handle
     private void OnHandleDrag(PointerMoveEvent evt, int index)
     {
         float localX = evt.localPosition.x;
@@ -82,7 +80,6 @@ public partial class MultiPointSlider : VisualElement
         UpdateHandles();
     }
 
-    // End dragging
     private void OnHandleDragEnd(PointerUpEvent evt, int index)
     {
         this.ReleasePointer(evt.pointerId);

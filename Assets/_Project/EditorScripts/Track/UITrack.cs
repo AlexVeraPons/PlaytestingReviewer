@@ -6,54 +6,66 @@ using UnityEngine.UIElements;
 
 namespace PlaytestingReviewer.Editors
 {
+    /// <summary>
+    /// An abstract base class for implementing visual UI tracks within the Unity Editor environment.
+    /// This class provides a framework for managing UI layouts, descriptions, and actions related to the visualization of information in time-based interactions.
+    /// </summary>
     public abstract class UITrack
     {
         protected Action OnResize;
 
-        protected VisualElement _infoRoot;
-        protected VisualElement _descriptionRoot;
+        protected ITimePositionTranslator TimeRelations;
 
-        protected VisualElement _descriptionContainer;
-        protected VisualElement _informationContainer;
+        protected VisualElement InfoRoot;
+        protected VisualElement DescriptionRoot;
+        protected VisualElement InformationContainer;
+        protected VisualElement DescriptionContainer;
+        private VisualElement _coloredBar;
 
-        protected ITimePositionTranslator _timeRelations;
-
-        protected float _trackHeight = 40;
+        protected float TrackHeight = 40;
 
         private float _resizeDebounceTimer = 0f;
-        protected float _resizeDebounceDuration = 1f;
+        protected float ResizeDebounceDuration = 1f;
         private bool _shouldStartResizeTimer = false;
-        protected VisualElement _elementToAdaptToWidth;
 
+        protected StyleColor BarColor = new StyleColor(new Color(0.90f, 0.90f, 1f));
+
+        private VisualElement _elementToAdaptToWidth;
         private VisualElement _imageContainer;
+        protected string Title = "Description";
+        protected Label DescriptionLabel;
 
-        protected string _title = "Description";
-        protected Label _descriptionLabel;
-        
-        protected StyleColor barColor = new StyleColor(new Color(0.90f, 0.90f, 1f));
+        protected UITrack(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
+        {
+            TimeRelations = timeRelations;
+
+            DescriptionRoot = description;
+            InfoRoot = information;
+            EditorApplication.update += TrackUpdate;
+
+            Initialization();
+        }
+
+        private void Initialization()
+        {
+            PreInitialization();
+
+            InitializeDescription(DescriptionRoot);
+            InitializeInformation(InfoRoot);
+        }
 
         /// <summary>
-        /// Constructor for the track class
+        /// Called during the initial setup phase of the UITrack, before initializing other components such as
+        /// the description or information sections. This can be overriden to additional data, establish configurations,
+        /// or execute tasks required prior to the main initialization process.
         /// </summary>
-        /// <param name="description">Where you want the label and what the track does</param>
-        /// <param name="information">Where you want the information to be visualized</param>
-        public UITrack(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
+        protected virtual void PreInitialization()
         {
-            Initialization(description, information, timeRelations);
         }
 
-        protected virtual void Initialization(VisualElement description, VisualElement information, ITimePositionTranslator timeRelations)
-        {
-            _timeRelations = timeRelations;
-
-            _descriptionRoot = description;
-            _infoRoot = information;
-
-            InitializeDescription(description);
-            InitializeInformation(information);
-
-            EditorApplication.update += TrackUpdate;
-        }
+        /// <summary>
+        /// Executes frame-based updates for managing timing-related operations and UI element adjustments within the track.
+        /// </summary>
         protected virtual void TrackUpdate()
         {
             if (_shouldStartResizeTimer == true)
@@ -67,10 +79,13 @@ namespace PlaytestingReviewer.Editors
                 }
             }
         }
-
+        
+        /// <summary>
+        /// Creates the information container where all the data is going to be visualized 
+        /// </summary>
         protected virtual void InitializeInformation(VisualElement information)
         {
-            _informationContainer = new VisualElement
+            InformationContainer = new VisualElement
             {
                 style =
                 {
@@ -96,7 +111,7 @@ namespace PlaytestingReviewer.Editors
                     // Layout
                     flexDirection = FlexDirection.Row,
                     alignItems = Align.Center,
-                    height = _trackHeight,
+                    height = TrackHeight,
                     marginBottom = 5,
                     marginTop = 5,
                     paddingLeft = 10,
@@ -104,25 +119,27 @@ namespace PlaytestingReviewer.Editors
                 }
             };
 
-            information.Add(_informationContainer);
+            information.Add(InformationContainer);
         }
 
+        /// <summary>
+        /// Sets up the description section of the UITrack. This method can be overridden to customize
+        /// the visual layout, content, or features of the description area within the UI track.
+        /// </summary>
         protected virtual void InitializeDescription(VisualElement description)
         {
-            // Main container for the description
-            _descriptionContainer = new VisualElement
+            DescriptionContainer = new VisualElement
             {
                 style =
                 {
                     flexDirection = FlexDirection.Row,
                     alignItems = Align.Center,
-                    height = _trackHeight,
+                    height = TrackHeight,
                     marginBottom = 5,
                     marginTop = 5,
 
                     backgroundColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f)),
 
-                    // Borders (unified for a consistent look)
                     borderTopWidth = 1,
                     borderBottomWidth = 1,
                     borderLeftWidth = 1,
@@ -136,29 +153,26 @@ namespace PlaytestingReviewer.Editors
                     borderBottomLeftRadius = 6,
                     borderBottomRightRadius = 6,
 
-                    // Some horizontal padding
                     paddingLeft = 5,
                     paddingRight = 5,
                 }
             };
 
-            // Pastel bar on the left side
-           
-            var pastelBar = new VisualElement
+
+             _coloredBar = new VisualElement
             {
                 style =
                 {
                     width = 8,
                     height = new Length(100, LengthUnit.Percent),
-                    backgroundColor = barColor,
+                    backgroundColor = BarColor,
                     marginLeft = -5f,
                     borderBottomLeftRadius = 6,
                     borderTopLeftRadius = 6
                 }
             };
-            _descriptionContainer.Add(pastelBar);
+            DescriptionContainer.Add(_coloredBar);
 
-            // We can keep a small spacer if we like
             var spacerElement = new VisualElement
             {
                 style =
@@ -167,9 +181,8 @@ namespace PlaytestingReviewer.Editors
                     height = 20
                 }
             };
-            _descriptionContainer.Add(spacerElement);
+            DescriptionContainer.Add(spacerElement);
 
-            // Square or “icon” element
             _imageContainer = new VisualElement
             {
                 style =
@@ -180,9 +193,8 @@ namespace PlaytestingReviewer.Editors
                     marginRight = 10
                 }
             };
-            _descriptionContainer.Add(_imageContainer);
+            DescriptionContainer.Add(_imageContainer);
 
-            // Label container
             var labelContainer = new VisualElement
             {
                 style =
@@ -193,7 +205,6 @@ namespace PlaytestingReviewer.Editors
                     paddingLeft = 10,
                     paddingRight = 10,
 
-                    // Smoother rounding
                     borderTopLeftRadius = 4,
                     borderTopRightRadius = 4,
                     borderBottomLeftRadius = 4,
@@ -210,7 +221,7 @@ namespace PlaytestingReviewer.Editors
                 }
             };
 
-            _descriptionLabel = new Label(_title)
+            DescriptionLabel = new Label(Title)
             {
                 style =
                 {
@@ -218,21 +229,21 @@ namespace PlaytestingReviewer.Editors
                     fontSize = 14
                 }
             };
-            
-            labelContainer.Add(_descriptionLabel);
-            _descriptionContainer.Add(labelContainer);
+
+            labelContainer.Add(DescriptionLabel);
+            DescriptionContainer.Add(labelContainer);
 
             // Button for context menu
             var button = new Button() { text = ":" };
-            button.clicked += OnButtonClicked;
+            button.clicked += OnThreeDotsClicked;
             button.style.marginLeft = 10;
-            _descriptionContainer.Add(button);
+            DescriptionContainer.Add(button);
 
-            // Finally, add the container to the parent
-            description.Add(_descriptionContainer);
+            description.Add(DescriptionContainer);
         }
 
-        protected virtual void OnButtonClicked()
+        
+        private void OnThreeDotsClicked()
         {
             var menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete Track"), false, DeleteTrack);
@@ -241,29 +252,39 @@ namespace PlaytestingReviewer.Editors
             menu.ShowAsContext();
         }
 
-        protected virtual void AddMenuItems(GenericMenu menu) { } // Default implementation
+        /// <summary>
+        /// Override this method to include additional menu options specific to the implementation.
+        /// </summary>
+        /// <param name="menu">The GenericMenu instance to which new menu items can be added to.</param>
+        protected virtual void AddMenuItems(GenericMenu menu)
+        {
+        }
 
+        /// <summary>
+        /// Toggles the visibility of the information container associated with the UI track.
+        /// Executes all logic needed to do this.
+        /// </summary>
         protected virtual void ToggleVisibility()
         {
-            if (_informationContainer == null)
+            if (InformationContainer == null)
             {
-                InitializeInformation(_infoRoot);
+                InitializeInformation(InfoRoot);
             }
             else
             {
-                _informationContainer.RemoveFromHierarchy();
-                _informationContainer.Clear();
-                _informationContainer = null;
+                InformationContainer.RemoveFromHierarchy();
+                InformationContainer.Clear();
+                InformationContainer = null;
             }
         }
 
-        protected void DeleteTrack()
+        private void DeleteTrack()
         {
-            _descriptionContainer?.RemoveFromHierarchy();
-            _informationContainer?.RemoveFromHierarchy();
+            DescriptionContainer?.RemoveFromHierarchy();
+            InformationContainer?.RemoveFromHierarchy();
 
-            _descriptionContainer = null;
-            _informationContainer = null;
+            DescriptionContainer = null;
+            InformationContainer = null;
         }
 
         public void AdaptToWidth(VisualElement element)
@@ -272,20 +293,29 @@ namespace PlaytestingReviewer.Editors
             element.RegisterCallback<GeometryChangedEvent>(_ => ElementResized());
         }
 
+        /// <summary>
+        /// Handles the resize event when the associated visual element's dimensions change.
+        /// This method can be overridden for custom behavior in derived classes.
+        /// </summary>
         protected virtual void ElementResized()
         {
             _shouldStartResizeTimer = true;
-            _resizeDebounceTimer = _resizeDebounceDuration;
+            _resizeDebounceTimer = ResizeDebounceDuration;
 
-            if (_informationContainer != null && _elementToAdaptToWidth != null)
+            if (InformationContainer != null && _elementToAdaptToWidth != null)
             {
-                _informationContainer.style.width = _elementToAdaptToWidth.resolvedStyle.width;
+                InformationContainer.style.width = _elementToAdaptToWidth.resolvedStyle.width;
             }
         }
-
         public void SetTrackIcon(Texture2D image)
         {
             _imageContainer.style.backgroundImage = image;
+        }
+
+        protected void ChangeBarColor(Color color)
+        {
+            BarColor = color;
+            _coloredBar.style.backgroundColor = BarColor;
         }
     }
 }

@@ -1,0 +1,41 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "color": {
+                "r": 0.9169811010360718,
+                "g": 0.7415199875831604,
+                "b": 0.30969732999801638,
+                "a": 1.0
+            },
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.133331"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "6.399995"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "8.099995"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
