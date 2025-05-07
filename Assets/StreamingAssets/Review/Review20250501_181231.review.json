@@ -1,0 +1,28 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "color": {
+                "r": 0.9169811010360718,
+                "g": 0.7415199875831604,
+                "b": 0.30969732999801638,
+                "a": 1.0
+            },
+            "instances": []
+        },
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnNewSceneLoaded",
+            "color": {
+                "r": 0.0,
+                "g": 1.0,
+                "b": 0.9981646537780762,
+                "a": 1.0
+            },
+            "instances": []
+        }
+    ]
+}

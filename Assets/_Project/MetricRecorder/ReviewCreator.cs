@@ -1,17 +1,24 @@
 using System;
 using System.IO;
 using PlaytestingReviewer.Editors;
-using UnityEngine;
 using PlaytestingReviewer.Video;
-using UnityEditor;
+using PlaytestingReviewer.Tracks;
+using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace PlaytestingReviewer.Tracks
 {
-    ///<summary>
-    /// Initializes the review output folder and configures the video capture and track collection settings.
-    /// When the object is destroyed, it converts the collected tracks to JSON and creates a Review asset 
-    /// that links the track data and video file for later analysis.
+    /// <summary>
+    /// At Awake, makes a timestamped ReviewOutput folder:
+    /// - In the Editor, under Assets/_Project/ReviewOutput
+    /// - In a build, under Application.persistentDataPath/ReviewOutput
+    /// 
+    /// OnDestroy, writes out the track JSON + video filename,
+    /// and either creates a Review.asset (Editor) or a small
+    /// .review descriptor file (build).
     /// </summary>
     public class ReviewCreator : MonoBehaviour
     {
@@ -20,66 +27,81 @@ namespace PlaytestingReviewer.Tracks
 
         private string _folderName;
         private string _folderPath;
+        private bool _directoryCreated;
 
-        private void Start()
+        private void Awake()
         {
+            // Find the collector & capture if not wired
             if (_trackCollector == null)
-            {
                 _trackCollector = FindFirstObjectByType<TrackCollector>();
-                if(_trackCollector == null) Debug.LogWarning("There is no TrackCollector on this scene.");
-            }
-
             if (_videoCapture == null)
-            {
                 _videoCapture = FindFirstObjectByType<VideoCapture>();
-            }
 
+            // Prepare a new output directory
+            _folderName = "Review" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
             CreateFutureDirectory();
+
+            // Tell the capture where to write its .mp4
             _videoCapture.outputPath = _folderPath;
             _videoCapture.outputFileName = _folderName + ".mp4";
         }
 
         private void CreateFutureDirectory()
         {
-            _folderName = "Review" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
+#if UNITY_EDITOR
+            // Editor: under Assets/_Project/ReviewOutput/<folderName>
+            const string rootAssetsPath = "Assets/_Project/ReviewOutput";
 
-            string relativePath = "Assets/_Project/ReviewOutput";
+            // ensure the root exists
+            if (!AssetDatabase.IsValidFolder(rootAssetsPath))
+                AssetDatabase.CreateFolder("Assets/_Project", "ReviewOutput");
 
-            if (!AssetDatabase.IsValidFolder(relativePath))
-            {
-                AssetDatabase.CreateFolder("Assets/_Project/", "ReviewOutput");
-            }
+            // make the timestamped subfolder
+            AssetDatabase.CreateFolder(rootAssetsPath, _folderName);
 
-            AssetDatabase.CreateFolder(relativePath, _folderName);
-            _folderPath = relativePath + "/" + _folderName;
+            _folderPath = Path.Combine(rootAssetsPath, _folderName).Replace("\\", "/");
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            _directoryCreated = true;
+#else
+            string buildFolder = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string root = Path.Combine(buildFolder, "ReviewOutput");
+            Directory.CreateDirectory(root);
+
+            _folderPath = Path.Combine(root, _folderName);
+            Directory.CreateDirectory(_folderPath);
+            _directoryCreated = true;
+#endif
         }
 
         private void OnDestroy()
         {
-            CreateReviewObject();
+            if (!_directoryCreated) return;
+            CreateReviewOutput();
         }
 
-        private void CreateReviewObject()
+        private void CreateReviewOutput()
         {
-            TrackCollection tracks = _trackCollector.GetTracks();
-            string reviewObjectTracksPath = _folderPath + "/" + _folderName + ".review";
-            TrackConverter.OutputTracksToJson(tracks,reviewObjectTracksPath);
-            
-            Review reviewObject = ScriptableObject.CreateInstance<Review>();
-            reviewObject.tracksPath =reviewObjectTracksPath;
-            reviewObject.videoPath =_folderPath + "/" + _folderName + ".mp4";            
+            // 1) Dump tracks JSON
+            var tracks = _trackCollector?.GetTracks();
+            string trackJsonPath = Path.Combine(
+                _folderPath,
+                _folderName + ".review.json"
+            );
+            TrackConverter.OutputTracksToJson(tracks, trackJsonPath);
 
-            AssetDatabase.CreateAsset(reviewObject, _folderPath + "/"+"Review.asset");
+#if UNITY_EDITOR
+            var reviewAsset = ScriptableObject.CreateInstance<Review>();
+            reviewAsset.tracksPath = trackJsonPath;
+            reviewAsset.videoPath = Path.Combine(_folderPath, _folderName + ".mp4");
+
+            AssetDatabase.CreateAsset(
+                reviewAsset,
+                Path.Combine(_folderPath, "Review.asset")
+            );
             AssetDatabase.SaveAssets();
-
-            DeleteFolder();
-        }
-
-        private void DeleteFolder()
-        {
+#endif
         }
     }
 }

@@ -1,18 +1,20 @@
-using System;
+using System;                                 // already present
 using UnityEngine;
 using UnityEngine.Events;
-using Random = UnityEngine.Random;
+using UnityEngine.SceneManagement;            // NEW – required for scene loading
+using Random = UnityEngine.Random;            
 
 namespace PlaytestingReviewer.Other
 {
     public class CircleReaction : MonoBehaviour
     {
         public Action OnColorChangeAction;
+        public Action OnLoadAction;
 
         public float moveSpeed = 5f;
+
         [SerializeField] private SpriteRenderer _spriteRenderer;
         public Color _currentColor;
-        private int randomInt = 20;
 
         private void Start()
         {
@@ -23,8 +25,12 @@ namespace PlaytestingReviewer.Other
         {
             Move();
             ChangeColor();
+            CheckSceneAdvance();              // NEW
         }
 
+        /* -------------------------------------------------
+         * Existing features
+         * -------------------------------------------------*/
         private void Move()
         {
             Vector2 moveDirection = Vector2.zero;
@@ -46,9 +52,29 @@ namespace PlaytestingReviewer.Other
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 _currentColor = new Color(Random.value, Random.value, Random.value);
-                _spriteRenderer.color =  new Color(Random.value, Random.value, Random.value);
-                Debug.Log("space pressed");
+                _spriteRenderer.color = _currentColor;
+                Debug.Log("Space pressed – colour changed");
                 OnColorChangeAction?.Invoke();
+            }
+        }
+
+        /* -------------------------------------------------
+         * NEW feature: advance to the next scene with P
+         * -------------------------------------------------*/
+        private void CheckSceneAdvance()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                int i = SceneManager.GetActiveScene().buildIndex;
+                int next = i + 1;
+
+                // If you've reached the last scene, you can loop or ignore.
+                // Here we wrap to 0 so the game keeps running in editor/standalone.
+                if (next >= SceneManager.sceneCountInBuildSettings)
+                    next = 0;
+
+                OnLoadAction?.Invoke();
+                SceneManager.LoadScene(next);
             }
         }
     }

@@ -3,53 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using PlaytestingReviewer.Video;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using PlaytestingReviewer.Video;
+using UnityEditor;
 
 namespace PlaytestingReviewer.Tracks
 {
     public class MetricRecorder : MonoBehaviour
     {
-        public string metricName = "Metric";
+        [Header("Metric Settings")] public string metricName = "Metric";
         public Color metricColor = Color.red;
 
-        [SerializeField] private MonoBehaviour _eventSource; // The MonoBehaviour holding the event
-        [SerializeField] private string _eventName; // The name of the event/delegate/UnityEvent to track
-        [SerializeField] private List<PropertyToTrack> _propertiesToTrack; // Properties to track
+        [Header("Events to Track (multiple)")] [SerializeField]
+        private List<EventToTrack> _eventsToTrack = new List<EventToTrack>();
+
+        [Header("Properties to Track")] [SerializeField]
+        private List<PropertyToTrack> _propertiesToTrack = new List<PropertyToTrack>();
 
         private Track _track;
-
-        // For standard .NET events:
-        private EventInfo _dotNetEvent;
-        private Delegate _eventDelegate; // Stored delegate for unsubscribing
-
-        // For UnityEvents:
-        private FieldInfo _unityEventField;
-
-        // For delegate field support (System.Action, etc.):
-        private FieldInfo _systemActionField;
-        private Delegate _systemActionDelegate; // The compiled delegate attached to the field
-
         private float _selfCurrentTime = 0f;
         private float _currentTime => _videoCapture == null ? _selfCurrentTime : _videoCapture.CurrentVideoTime;
-
         private VideoCapture _videoCapture;
+
+        private void Awake()
+        {
+            _videoCapture = FindAnyObjectByType<VideoCapture>(FindObjectsInactive.Include);
+        }
 
         private void Start()
         {
-            SubscribeToEvent();
             InitializeTrack();
-            _videoCapture = FindAnyObjectByType<VideoCapture>();
+            SubscribeToEvents();
         }
 
         private void Update()
         {
+            // If there's no VideoCapture, we simulate "time" ourselves.
             if (_videoCapture == null)
             {
                 _selfCurrentTime += Time.deltaTime;
             }
+        }
+
+        private void OnApplicationQuit()
+        {
+            UnsubscribeFromEvents();
+            AddTrackToCollector();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromEvents();
+            AddTrackToCollector();
         }
 
         private void InitializeTrack()
@@ -64,92 +70,137 @@ namespace PlaytestingReviewer.Tracks
             };
         }
 
-        /// <summary>
-        /// Subscribe to the event/delegate/UnityEvent defined in _eventSource with name _eventName.
-        /// Supports .NET events, UnityEvents, and now System.Action (delegate fields).
-        /// </summary>
-        private void SubscribeToEvent()
+        private void SubscribeToEvents()
         {
-            if (_eventSource == null || string.IsNullOrEmpty(_eventName))
-                return;
-
-            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-
-            // Try to find a C# event first.
-            _dotNetEvent = _eventSource.GetType().GetEvent(_eventName, flags);
-            if (_dotNetEvent != null)
+            foreach (var evt in _eventsToTrack)
             {
-                Type eventHandlerType = _dotNetEvent.EventHandlerType;
-                _eventDelegate = CreateDelegateForEvent(eventHandlerType);
+                if (evt.eventSource == null || string.IsNullOrEmpty(evt.eventName))
+                    continue;
 
-                bool isStatic = _dotNetEvent.GetAddMethod().IsStatic;
-                object target = isStatic ? null : _eventSource;
-                _dotNetEvent.AddEventHandler(target, _eventDelegate);
-                return;
-            }
+                var sourceType = evt.eventSource.GetType();
+                BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-            _unityEventField = _eventSource.GetType().GetField(_eventName, flags);
-            if (_unityEventField != null && typeof(UnityEventBase).IsAssignableFrom(_unityEventField.FieldType))
-            {
-                UnityEventBase unityEvent = _unityEventField.GetValue(_eventSource) as UnityEventBase;
-                if (unityEvent != null)
+                // 1) .NET event (C# event)
+                evt.dotNetEvent = sourceType.GetEvent(evt.eventName, flags);
+                if (evt.dotNetEvent != null)
                 {
-                    MethodInfo addListenerMethod =
-                        unityEvent.GetType().GetMethod("AddListener", new Type[] { typeof(UnityAction) });
-                    if (addListenerMethod != null)
+                    Type eventHandlerType = evt.dotNetEvent.EventHandlerType;
+                    evt.eventDelegate = CreateDelegateForEvent(eventHandlerType);
+
+                    bool isStatic = evt.dotNetEvent.GetAddMethod().IsStatic;
+                    object target = isStatic ? null : evt.eventSource;
+                    evt.dotNetEvent.AddEventHandler(target, evt.eventDelegate);
+                    continue;
+                }
+
+                // 2) UnityEvent field
+                evt.unityEventField = sourceType.GetField(evt.eventName, flags);
+                if (evt.unityEventField != null &&
+                    typeof(UnityEventBase).IsAssignableFrom(evt.unityEventField.FieldType))
+                {
+                    var unityEvent = evt.unityEventField.GetValue(evt.eventSource) as UnityEventBase;
+                    if (unityEvent != null)
                     {
-                        UnityAction action = OnUnityEventTriggered;
-                        addListenerMethod.Invoke(unityEvent, new object[] { action });
+                        // We add a listener: use reflection to call AddListener(UnityAction)
+                        MethodInfo addListenerMethod = unityEvent.GetType()
+                            .GetMethod("AddListener", new Type[] { typeof(UnityAction) });
+                        if (addListenerMethod != null)
+                        {
+                            UnityAction action = OnUnityEventFired;
+                            addListenerMethod.Invoke(unityEvent, new object[] { action });
+                        }
+                    }
+
+                    continue;
+                }
+
+                // 3) Delegate field (e.g. System.Action)
+                evt.systemActionField = sourceType.GetField(evt.eventName, flags);
+                if (evt.systemActionField != null &&
+                    typeof(Delegate).IsAssignableFrom(evt.systemActionField.FieldType))
+                {
+                    evt.systemActionDelegate = CreateDelegateForEvent(evt.systemActionField.FieldType);
+                    Delegate existing = evt.systemActionField.GetValue(evt.eventSource) as Delegate;
+                    Delegate combined = Delegate.Combine(existing, evt.systemActionDelegate);
+                    evt.systemActionField.SetValue(evt.eventSource, combined);
+                }
+            }
+        }
+
+        private void UnsubscribeFromEvents()
+        {
+            foreach (var evt in _eventsToTrack)
+            {
+                // 1) .NET event
+                if (evt.dotNetEvent != null && evt.eventDelegate != null)
+                {
+                    bool isStatic = evt.dotNetEvent.GetRemoveMethod().IsStatic;
+                    object target = isStatic ? null : evt.eventSource;
+                    evt.dotNetEvent.RemoveEventHandler(target, evt.eventDelegate);
+                }
+
+                // 2) UnityEvent
+                if (evt.unityEventField != null)
+                {
+                    var unityEvent = evt.unityEventField.GetValue(evt.eventSource) as UnityEventBase;
+                    if (unityEvent != null)
+                    {
+                        // remove the same action: OnUnityEventFired
+                        MethodInfo removeListenerMethod = unityEvent.GetType()
+                            .GetMethod("RemoveListener", new Type[] { typeof(UnityAction) });
+                        if (removeListenerMethod != null)
+                        {
+                            UnityAction action = OnUnityEventFired;
+                            removeListenerMethod.Invoke(unityEvent, new object[] { action });
+                        }
                     }
                 }
 
-                return;
-            }
-
-            _systemActionField = _eventSource.GetType().GetField(_eventName, flags);
-            if (_systemActionField != null && typeof(Delegate).IsAssignableFrom(_systemActionField.FieldType))
-            {
-                _systemActionDelegate = CreateDelegateForEvent(_systemActionField.FieldType);
-
-                Delegate existing = _systemActionField.GetValue(_eventSource) as Delegate;
-                Delegate combined = Delegate.Combine(existing, _systemActionDelegate);
-                _systemActionField.SetValue(_eventSource, combined);
+                // 3) Delegate field
+                if (evt.systemActionField != null && evt.systemActionDelegate != null)
+                {
+                    Delegate existing = evt.systemActionField.GetValue(evt.eventSource) as Delegate;
+                    Delegate removed = Delegate.Remove(existing, evt.systemActionDelegate);
+                    evt.systemActionField.SetValue(evt.eventSource, removed);
+                }
             }
         }
 
         /// <summary>
-        /// Creates a delegate that matches any delegate signature by ignoring its parameters
-        /// and simply calling LogEvent().
+        /// Creates a delegate that ignores parameters and calls LogEvent().
         /// </summary>
-        /// <param name="delegateType">The type of the delegate expected by the event or field.</param>
-        /// <returns>A delegate of the given type that calls LogEvent().</returns>
         private Delegate CreateDelegateForEvent(Type delegateType)
         {
             MethodInfo invokeMethod = delegateType.GetMethod("Invoke");
             ParameterInfo[] parameters = invokeMethod.GetParameters();
 
-            ParameterExpression[] paramExpressions =
-                parameters.Select(p => Expression.Parameter(p.ParameterType, p.Name)).ToArray();
+            // create param expressions
+            var paramExpressions = parameters
+                .Select(p => Expression.Parameter(p.ParameterType, p.Name))
+                .ToArray();
 
             MethodInfo logEventMethod = typeof(MetricRecorder)
                 .GetMethod(nameof(LogEvent), BindingFlags.NonPublic | BindingFlags.Instance);
 
-            Expression callLogEvent = Expression.Call(Expression.Constant(this), logEventMethod);
+            Expression callLogEvent = Expression.Call(
+                Expression.Constant(this),
+                logEventMethod
+            );
 
             var lambda = Expression.Lambda(delegateType, callLogEvent, paramExpressions);
             return lambda.Compile();
         }
 
         /// <summary>
-        /// Callback for UnityEvent-based events.
+        /// Called when any UnityEvent from any tracked source is fired.
         /// </summary>
-        private void OnUnityEventTriggered()
+        private void OnUnityEventFired()
         {
             LogEvent();
         }
 
         /// <summary>
-        /// Logs the event occurrence.
+        /// The core logging function: grabs property data and appends a record to the track.
         /// </summary>
         private void LogEvent()
         {
@@ -162,38 +213,39 @@ namespace PlaytestingReviewer.Tracks
 
                 if (property.targetObject != null && !string.IsNullOrEmpty(property.propertyName))
                 {
-                    var type = property.targetObject.GetType();
+                    var targetType = property.targetObject.GetType();
 
-                    var fieldInfo = type.GetField(
+                    // Try field first
+                    var fieldInfo = targetType.GetField(
                         property.propertyName,
                         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                     );
-
                     if (fieldInfo != null)
                     {
                         value = fieldInfo.GetValue(property.targetObject);
                     }
                     else
                     {
-                        var propInfo = type.GetProperty(
+                        // Then try property
+                        var propInfo = targetType.GetProperty(
                             property.propertyName,
                             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                         );
-
                         if (propInfo != null)
                         {
                             value = propInfo.GetValue(property.targetObject);
                         }
                         else
                         {
+                            // fallback to custom Value
                             value = property.Value;
-                            Debug.LogWarning(property.propertyName + " was not found in " + property.targetObject +
-                                             ".");
+                            Debug.LogWarning($"'{property.propertyName}' not found on '{property.targetObject}'.");
                         }
                     }
                 }
                 else
                 {
+                    // fallback if no object or no property specified
                     value = property.Value;
                 }
 
@@ -203,154 +255,116 @@ namespace PlaytestingReviewer.Tracks
             _track.instances.Add(instance);
         }
 
-        private void OnApplicationQuit()
-        {
-            UnsubscribeFromEvent();
-            AddTrackToCollector();
-        }
-
         private void AddTrackToCollector()
         {
-            TrackCollector collector = FindFirstObjectByType<TrackCollector>();
-
-            if (collector == null)
-            {
-                Debug.LogError("There is no TrackCollector in the scene.");
-                return;
-            }
-
-            collector.AddTrack(_track);
-        }
-
-        /// <summary>
-        /// Unsubscribes from whichever event/delegate/UnityEvent we subscribed to.
-        /// </summary>
-        private void UnsubscribeFromEvent()
-        {
-            // .NET event unsubscribe
-            if (_dotNetEvent != null && _eventDelegate != null)
-            {
-                bool isStatic = _dotNetEvent.GetRemoveMethod().IsStatic;
-                object target = isStatic ? null : _eventSource;
-                _dotNetEvent.RemoveEventHandler(target, _eventDelegate);
-            }
-
-            // UnityEvent unsubscribe
-            if (_unityEventField != null)
-            {
-                UnityEventBase unityEvent = _unityEventField.GetValue(_eventSource) as UnityEventBase;
-                if (unityEvent != null)
-                {
-                    MethodInfo removeListenerMethod = unityEvent.GetType()
-                        .GetMethod("RemoveListener", new Type[] { typeof(UnityAction) });
-                    if (removeListenerMethod != null)
-                    {
-                        UnityAction action = OnUnityEventTriggered;
-                        removeListenerMethod.Invoke(unityEvent, new object[] { action });
-                    }
-                }
-            }
-
-            // System Action unsubscribe
-            if (_systemActionField != null && _systemActionDelegate != null)
-            {
-                Delegate existing = _systemActionField.GetValue(_eventSource) as Delegate;
-                Delegate removed = Delegate.Remove(existing, _systemActionDelegate);
-                _systemActionField.SetValue(_eventSource, removed);
-            }
+            TrackCollector.Instance.AddTrack(_track);
         }
     }
+
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(MetricRecorder))]
     public class MetricRecorderEditor : Editor
     {
-        // For an optional foldout to hide/show Tracked Properties
+        private bool showEvents = true;
         private bool showTrackedProperties = true;
 
         public override void OnInspectorGUI()
         {
             // Reference to the actual script
-            MetricRecorder recorder = (MetricRecorder)target;
-
-            // Synchronize serialized object with actual fields
+            var recorder = (MetricRecorder)target;
             serializedObject.Update();
 
             // -- METRIC SETTINGS --
             EditorGUILayout.LabelField("Metric Settings", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical("helpbox");
             {
-                // Metric Name
                 SerializedProperty metricNameProp = serializedObject.FindProperty("metricName");
                 EditorGUILayout.PropertyField(metricNameProp, new GUIContent("Metric Name"));
-                
+
                 SerializedProperty metricColorProp = serializedObject.FindProperty("metricColor");
                 EditorGUILayout.PropertyField(metricColorProp, new GUIContent("Metric Color"));
-
-                EditorGUILayout.Space(5);
-
-                // Event Source + Event Name
-                SerializedProperty eventSourceProp = serializedObject.FindProperty("_eventSource");
-                EditorGUILayout.PropertyField(eventSourceProp, new GUIContent("Event Source"));
-
-                // Dropdown for the event name
-                SerializedProperty eventNameProp = serializedObject.FindProperty("_eventName");
-                if (eventSourceProp.objectReferenceValue != null)
-                {
-                    MonoBehaviour eventSource = eventSourceProp.objectReferenceValue as MonoBehaviour;
-                    if (eventSource != null)
-                    {
-                        List<string> availableEvents = GetAvailableEvents(eventSource) ?? new List<string>();
-                        int selectedIndex = Mathf.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
-                        selectedIndex = EditorGUILayout.Popup("Event", selectedIndex, availableEvents.ToArray());
-                        if (selectedIndex >= 0 && selectedIndex < availableEvents.Count)
-                        {
-                            eventNameProp.stringValue = availableEvents[selectedIndex];
-                        }
-                    }
-                }
             }
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.Space(10);
 
+            // -- EVENTS TO TRACK --
+            showEvents = EditorGUILayout.Foldout(showEvents, "Events to Track", true);
+            if (showEvents)
+            {
+                EditorGUILayout.BeginVertical("helpbox");
+                {
+                    SerializedProperty eventsList = serializedObject.FindProperty("_eventsToTrack");
+                    for (int i = 0; i < eventsList.arraySize; i++)
+                    {
+                        SerializedProperty evtElement = eventsList.GetArrayElementAtIndex(i);
+                        EditorGUILayout.BeginVertical("box");
+                        {
+                            SerializedProperty eventSourceProp = evtElement.FindPropertyRelative("eventSource");
+                            EditorGUILayout.PropertyField(eventSourceProp, new GUIContent("Event Source"));
+
+                            SerializedProperty eventNameProp = evtElement.FindPropertyRelative("eventName");
+                            if (eventSourceProp.objectReferenceValue != null)
+                            {
+                                MonoBehaviour srcMono = eventSourceProp.objectReferenceValue as MonoBehaviour;
+                                if (srcMono)
+                                {
+                                    List<string> availableEvents = GetAvailableEvents(srcMono);
+                                    int index = Math.Max(0, availableEvents.IndexOf(eventNameProp.stringValue));
+                                    index = EditorGUILayout.Popup("Event Name", index, availableEvents.ToArray());
+                                    if (index >= 0 && index < availableEvents.Count)
+                                    {
+                                        eventNameProp.stringValue = availableEvents[index];
+                                    }
+                                }
+                            }
+
+                            // Remove button
+                            if (GUILayout.Button("Remove Event", GUILayout.Width(120)))
+                            {
+                                eventsList.DeleteArrayElementAtIndex(i);
+                                // Important: break or continue after removing to avoid out-of-range
+                                break;
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                    }
+
+                    if (GUILayout.Button("Add New Event"))
+                    {
+                        eventsList.InsertArrayElementAtIndex(eventsList.arraySize);
+                    }
+                }
+                EditorGUILayout.EndVertical();
+            }
+
+            EditorGUILayout.Space(10);
+
             // -- TRACKED PROPERTIES --
-            showTrackedProperties = EditorGUILayout.Foldout(showTrackedProperties, "Tracked Properties", true,
-                EditorStyles.foldoutHeader);
+            showTrackedProperties = EditorGUILayout.Foldout(showTrackedProperties, "Tracked Properties", true);
             if (showTrackedProperties)
             {
                 EditorGUILayout.BeginVertical("helpbox");
                 {
                     SerializedProperty propertiesList = serializedObject.FindProperty("_propertiesToTrack");
-
-                    for (int i = propertiesList.arraySize - 1; i >= 0; i--)
+                    for (int i = 0; i < propertiesList.arraySize; i++)
                     {
                         SerializedProperty propertyElement = propertiesList.GetArrayElementAtIndex(i);
-                        if (propertyElement == null)
-                        {
-                            Debug.LogError($"Property element at index {i} is null!");
-                            continue;
-                        }
-
                         EditorGUILayout.BeginVertical("box");
                         {
-                            SerializedProperty targetObjectProp =
-                                propertyElement.FindPropertyRelative("targetObject");
+                            SerializedProperty targetObjectProp = propertyElement.FindPropertyRelative("targetObject");
                             EditorGUILayout.PropertyField(targetObjectProp, new GUIContent("Target Object"));
 
                             if (targetObjectProp.objectReferenceValue != null)
                             {
-                                SerializedProperty propertyNameProp =
-                                    propertyElement.FindPropertyRelative("propertyName");
+                                SerializedProperty propertyNameProp = propertyElement.FindPropertyRelative("propertyName");
                                 MonoBehaviour targetMono = targetObjectProp.objectReferenceValue as MonoBehaviour;
                                 if (targetMono != null)
                                 {
-                                    List<string> availableProps =
-                                        GetAvailableProperties(targetMono) ?? new List<string>();
-                                    int propIndex = Mathf.Max(0,
-                                        availableProps.IndexOf(propertyNameProp.stringValue));
-                                    propIndex = EditorGUILayout.Popup("Property", propIndex,
-                                        availableProps.ToArray());
+                                    List<string> availableProps = GetAvailableProperties(targetMono);
+                                    int propIndex = Math.Max(0, availableProps.IndexOf(propertyNameProp.stringValue));
+                                    propIndex = EditorGUILayout.Popup("Property", propIndex, availableProps.ToArray());
                                     if (propIndex >= 0 && propIndex < availableProps.Count)
                                     {
                                         propertyNameProp.stringValue = availableProps[propIndex];
@@ -359,19 +373,16 @@ namespace PlaytestingReviewer.Tracks
                             }
 
                             // Remove button
-                            if (GUILayout.Button("Remove", GUILayout.MaxWidth(75)))
+                            if (GUILayout.Button("Remove Property", GUILayout.Width(120)))
                             {
                                 propertiesList.DeleteArrayElementAtIndex(i);
+                                break;
                             }
                         }
                         EditorGUILayout.EndVertical();
                     }
 
-                    // Add property button
-                    EditorGUILayout.Space();
-                    GUIStyle addButtonStyle = new GUIStyle(GUI.skin.button);
-                    addButtonStyle.fontStyle = FontStyle.Bold;
-                    if (GUILayout.Button("Add Property", addButtonStyle))
+                    if (GUILayout.Button("Add Property"))
                     {
                         propertiesList.InsertArrayElementAtIndex(propertiesList.arraySize);
                     }
@@ -379,14 +390,9 @@ namespace PlaytestingReviewer.Tracks
                 EditorGUILayout.EndVertical();
             }
 
-            // Apply modifications
             serializedObject.ApplyModifiedProperties();
         }
 
-        /// <summary>
-        /// Gets the list of public .NET events, public UnityEvent fields, and delegate fields (System.Action, etc.)
-        /// from the target MonoBehaviour. This is what populates the "Event" dropdown.
-        /// </summary>
         private List<string> GetAvailableEvents(MonoBehaviour target)
         {
             List<string> eventNames = new List<string>();
@@ -401,24 +407,20 @@ namespace PlaytestingReviewer.Tracks
 
             // 2) UnityEvent fields
             var unityEventFields = type.GetFields(flags)
-                .Where(field => typeof(UnityEventBase).IsAssignableFrom(field.FieldType))
-                .Select(field => field.Name);
+                .Where(f => typeof(UnityEventBase).IsAssignableFrom(f.FieldType))
+                .Select(f => f.Name);
             eventNames.AddRange(unityEventFields);
 
-            // 3) Delegate fields (e.g. System.Action, or any other delegate).
+            // 3) Delegate fields (System.Action, etc.)
             var delegateFields = type.GetFields(flags)
-                .Where(field =>
-                    typeof(Delegate).IsAssignableFrom(field.FieldType)
-                    && field.FieldType.BaseType == typeof(MulticastDelegate))
-                .Select(field => field.Name);
+                .Where(f => typeof(Delegate).IsAssignableFrom(f.FieldType)
+                            && f.FieldType.BaseType == typeof(MulticastDelegate))
+                .Select(f => f.Name);
             eventNames.AddRange(delegateFields);
 
             return eventNames;
         }
 
-        /// <summary>
-        /// Gets a list of public properties & fields from the given MonoBehaviour.
-        /// </summary>
         private List<string> GetAvailableProperties(MonoBehaviour target)
         {
             List<string> propNames = new List<string>();
@@ -427,17 +429,18 @@ namespace PlaytestingReviewer.Tracks
             Type type = target.GetType();
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
 
-            // Public properties with a getter
-            propNames.AddRange(type.GetProperties(flags)
-                .Where(p => p.CanRead)
-                .Select(p => p.Name));
+            // Public or non-public properties with a getter
+            propNames.AddRange(
+                type.GetProperties(flags).Where(p => p.CanRead).Select(p => p.Name)
+            );
 
-            // Public fields
-            propNames.AddRange(type.GetFields(flags)
-                .Select(f => f.Name));
+            // Fields
+            propNames.AddRange(type.GetFields(flags).Select(f => f.Name));
 
             return propNames;
         }
     }
 #endif
 }
+
+

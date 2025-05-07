@@ -162,6 +162,9 @@ namespace PlaytestingReviewer
             }
             catch (Exception ex)
             {
+                
+                
+                
                 Debug.LogError($"Error deleting frames or .meta files: {ex.Message}");
             }
         }
