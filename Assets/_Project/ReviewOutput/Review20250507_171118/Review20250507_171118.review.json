@@ -1,0 +1,101 @@
+{
+    "tracks": [
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnColorChanged",
+            "color": {
+                "r": 0.9169811010360718,
+                "g": 0.7415199875831604,
+                "b": 0.30969732999801638,
+                "a": 1.0
+            },
+            "instances": [
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.566666"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.230, 0.663, 0.189, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "2.766665"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.671, 0.386, 0.588, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.199997"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.411, 0.989, 0.042, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "1.566666"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.230, 0.663, 0.189, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "2.766665"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.671, 0.386, 0.588, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.199997"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.411, 0.989, 0.042, 1.000)"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": 0,
+            "iconName": "DefaultIcon",
+            "name": "OnNewSceneLoaded",
+            "color": {
+                "r": 0.0,
+                "g": 1.0,
+                "b": 0.9981646537780762,
+                "a": 1.0
+            },
+            "instances": []
+        }
+    ]
+}

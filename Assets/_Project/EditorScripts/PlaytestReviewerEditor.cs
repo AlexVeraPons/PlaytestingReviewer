@@ -62,28 +62,30 @@ namespace PlaytestingReviewer.Editors
 
         private void InitializeTracks()
         {
-            var trackDescription = rootVisualElement.Q<ScrollView>("TrackDescriptions");
-            var trackInformation = rootVisualElement.Q<ScrollView>("TrackInformation");
-            var timeView = rootVisualElement.Q<ScrollView>("TimeScroll");
+            // this is your editor window's root
+            var root = rootVisualElement;
 
-            _tracksButton = new TracksButton(rootVisualElement.Q<Button>("AddTracksButton"),
-                trackDescription,
-                trackInformation,
-                _timeIndicatorController,
-                rootVisualElement.Q<VisualElement>("TimeView"));
+            // query each element by its name (as defined in your UXML USS)
+            Button addTracksButton = root.Q<Button>("AddTracksButton");
+            ScrollView trackDescription = root.Q<ScrollView>("TrackDescriptions");
+            ScrollView trackInformation = root.Q<ScrollView>("TrackInformation");
+            VisualElement timeView = root.Q<VisualElement>("TimeView");
+            ScrollView timeScroll = root.Q<ScrollView>("TimeScroll");
 
-            var previewTrackIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(_iconPath);
-            var videoPreview = new VideoPreviewTrack(trackDescription, trackInformation, _timeIndicatorController, _videoController.VideoPlayer);
-            videoPreview.AdaptToWidth(rootVisualElement.Q<VisualElement>("TimeView"));
-            videoPreview.SetTrackIcon(previewTrackIcon);
 
-            // Synchronize horizontal scrolling
-            trackInformation.horizontalScroller.valueChanged += value => timeView.horizontalScroller.value = value;
-            timeView.horizontalScroller.valueChanged += value => trackInformation.horizontalScroller.value = value;
+            // 2) hand that, plus your TrackCollection and time‐translator, to the runtime helper
+            _tracksButton = new TracksButton(
+                root,
+                new TrackCollection(),
+                _timeIndicatorController
+            );
 
-            // Synchronize vertical scrolling
-            trackDescription.verticalScroller.valueChanged += value => trackInformation.verticalScroller.value = value;
-            trackInformation.verticalScroller.valueChanged += value => trackDescription.verticalScroller.value = value;
+
+            // synchronize scrolling exactly as before
+            trackInformation.horizontalScroller.valueChanged += v => timeScroll.horizontalScroller.value = v;
+            timeScroll.horizontalScroller.valueChanged += v => trackInformation.horizontalScroller.value = v;
+            trackDescription.verticalScroller.valueChanged += v => trackInformation.verticalScroller.value = v;
+            trackInformation.verticalScroller.valueChanged += v => trackDescription.verticalScroller.value = v;
         }
 
         public void OpenWindow(Review review)
@@ -105,7 +107,7 @@ namespace PlaytestingReviewer.Editors
         {
             _tracksButton.SetTrackCollection(collection);
         }
-        
+
         [OnOpenAsset(1)]
         public static bool OnOpenAsset(int instanceID, int line)
         {
@@ -121,8 +123,7 @@ namespace PlaytestingReviewer.Editors
             var nameLabel = window.rootVisualElement.Q<Label>("RecordingName");
             nameLabel.text = obj.name;
 
-            return true; 
+            return true;
         }
     }
-  
 }
