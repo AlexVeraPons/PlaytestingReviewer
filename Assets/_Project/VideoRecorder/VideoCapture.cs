@@ -16,7 +16,6 @@ namespace PlaytestingReviewer.Video
         public int height = 720;
         public int targetFramerate = 30;
 
-        private static string FfmpegExePath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
         private string _ffmpegPath = PathManager.FFmpegPath;
 
         private RenderTexture _renderTexture;
@@ -43,10 +42,8 @@ namespace PlaytestingReviewer.Video
 
         void Start()
         {
-            _ffmpegPath = FfmpegExePath;
             GetCamera();
 
-          
 
             if (captureOnStart)
                 StartCapture();
@@ -73,13 +70,9 @@ namespace PlaytestingReviewer.Video
             _captureDeltaTime = 1f / targetFramerate;
             _timeSinceLastFrame = 0f;
             _currentVideoTime = 0f;
-
-            string outFileName = !string.IsNullOrEmpty(outputFileName)
-                ? outputFileName
-                : "RecordedVideo_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4";
-            string outFilePath = !string.IsNullOrEmpty(outputPath)
-                ? Path.Combine(outputPath, outFileName)
-                : Path.Combine(PathManager.VideoOutputPath, outFileName);
+            
+            string outFileName = "Review" + ".mp4";
+            string outFilePath = Path.Combine(outputPath, outFileName);
 
             _encoder = new FFmpegVideoEncoder(width, height, targetFramerate, outFilePath, _ffmpegPath);
 
@@ -111,7 +104,6 @@ namespace PlaytestingReviewer.Video
             {
                 _encoder?.Dispose();
                 _encoder = null;
-                Debug.Log("FFmpegVideoEncoder disposed, video encoding finalized.");
             }
             catch (Exception e)
             {
@@ -193,7 +185,7 @@ namespace PlaytestingReviewer.Video
         private void GetCamera()
         {
             mainCamera = Camera.main;
-            
+
             if (captureCamera == null)
             {
                 GameObject captureCamObj = new GameObject("HiddenCaptureCamera");

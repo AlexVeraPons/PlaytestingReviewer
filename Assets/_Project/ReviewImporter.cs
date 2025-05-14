@@ -10,7 +10,6 @@ namespace PlaytestingReviewer
     public static class ReviewImporter
     {
         [MenuItem("Tools/Playtesting/Import Review…")]
-        [MenuItem("Tools/Playtesting/Import Review…")]
         private static void ImportReview()
         {
             string trackJsonPath = EditorUtility.OpenFilePanel(

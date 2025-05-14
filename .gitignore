@@ -101,3 +101,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,windows
+/Assets/StreamingAssets/Output
+/Assets/_Project/ReviewOutput
+/Assets/StreamingAssets/ReviewOutput
+/Assets/StreamingAssets/Review
+/Assets/StreamingAssets/Output

@@ -11,15 +11,6 @@ using UnityEditor;
 
 namespace PlaytestingReviewer.Tracks
 {
-    /// <summary>
-    /// At Awake, makes a timestamped ReviewOutput folder:
-    /// - In the Editor, under Assets/_Project/ReviewOutput
-    /// - In a build, under Application.persistentDataPath/ReviewOutput
-    /// 
-    /// OnDestroy, writes out the track JSON + video filename,
-    /// and either creates a Review.asset (Editor) or a small
-    /// .review descriptor file (build).
-    /// </summary>
     public class ReviewCreator : MonoBehaviour
     {
         [SerializeField] private TrackCollector _trackCollector;
@@ -94,7 +85,7 @@ namespace PlaytestingReviewer.Tracks
 #if UNITY_EDITOR
             var reviewAsset = ScriptableObject.CreateInstance<Review>();
             reviewAsset.tracksPath = trackJsonPath;
-            reviewAsset.videoPath = Path.Combine(_folderPath, _folderName + ".mp4");
+            reviewAsset.videoPath = Path.Combine(_folderPath, "Review" + ".mp4");
 
             AssetDatabase.CreateAsset(
                 reviewAsset,

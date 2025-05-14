@@ -1,21 +1,21 @@
 using UnityEngine;
-using System.IO;
 
 namespace PlaytestingReviewer
 {
     public static class PathManager
     {
-        public static readonly string DefaultImagePath = "Assets/_Project/Textures/defaultImage.png";
-        public static string FFmpegPath => Path.Combine(Application.streamingAssetsPath, "FFmpeg", "ffmpeg.exe");
-        public static string VideoOutputPath => Application.streamingAssetsPath + "/Output";
-        public static string FrameOutputPath => Application.streamingAssetsPath + "/Frames";
-        public static string ReviewOutputPath => "Assets/_Project/ReviewOutput";
+        private static readonly string _mainFolder = "Assets/_Project/";
 
-        public static readonly string ImageVideoLoadedPath = "Assets/_Project/Textures/videoLoaded.png";
+        public static readonly string DefaultImagePath = _mainFolder + "Textures/defaultImage.png";
+        public static string FFmpegPath => _mainFolder + "FFmpeg/ffmpeg.exe";
+        public static readonly string FrameOutputPath = Application.streamingAssetsPath + "/Frames";
+        public static readonly string ReviewOutputPath = _mainFolder + "/ReviewOutput";
 
-        public static readonly string PlaytestReviewerUxmlPath = "Assets/_Project/Editor/PlaytestReviewer.uxml";
-        public static readonly string PlaytestReviewerUSSPath = "Assets/_Project/Editor/PlaytestReviewer.uss";
-        public static readonly string VideoPreviewIcon = "Assets/_Project/Icons/VideoPreviewIcon.png";
+        public static readonly string ImageVideoLoadedPath = _mainFolder + "Textures/videoLoaded.png";
+
+        public static readonly string PlaytestReviewerUxmlPath = _mainFolder + "Editor/PlaytestReviewer.uxml";
+        public static readonly string PlaytestReviewerUSSPath = _mainFolder + "Editor/PlaytestReviewer.uss";
+        public static readonly string VideoPreviewIcon = _mainFolder + "Icons/VideoPreviewIcon.png";
         public static readonly string MetricIcon = Application.streamingAssetsPath + "/MetricIcon";
     }
 }

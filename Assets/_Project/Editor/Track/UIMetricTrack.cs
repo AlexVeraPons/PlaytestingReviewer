@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using PlaytestingReviewer.Tracks;
 using System;
+using UnityEditor.Graphs;
 
 namespace PlaytestingReviewer.Editors
 {
@@ -46,7 +47,7 @@ namespace PlaytestingReviewer.Editors
             InformationContainer.style.position = Position.Relative;
             DescriptionLabel.text = _track.name;
             ChangeBarColor(_track.color);
-            CreateTimeMarkers();
+            CreateTimeMarkers(_track.color);
         }
 
         protected override void InitializeDescription(VisualElement description)
@@ -55,7 +56,7 @@ namespace PlaytestingReviewer.Editors
             base.InitializeDescription(description);
         }
 
-        private void CreateTimeMarkers()
+        private void CreateTimeMarkers(Color color)
         {
             if (_track.instances == null || _track.instances.Count == 0)
                 return;
@@ -69,7 +70,7 @@ namespace PlaytestingReviewer.Editors
 
                 float normalizedTime = time / totalDuration;
 
-                VisualElement timeMarker = CreateMarkerVisualElement(normalizedTime);
+                VisualElement timeMarker = CreateMarkerVisualElement(normalizedTime, color);
 
                 string tooltipText = "";
                 foreach (var kvp in instance.ToDictionary())
@@ -83,7 +84,7 @@ namespace PlaytestingReviewer.Editors
             }
         }
 
-        private static VisualElement CreateMarkerVisualElement(float normalizedTime)
+        private static VisualElement CreateMarkerVisualElement(float normalizedTime, Color color)
         {
             VisualElement timeMarker = new VisualElement
             {
@@ -97,7 +98,7 @@ namespace PlaytestingReviewer.Editors
                     borderBottomLeftRadius = CornerRadius,
                     borderBottomRightRadius = CornerRadius,
 
-                    backgroundColor = new StyleColor(new Color(0.9f, 0.2f, 0.2f)),
+                    backgroundColor = new StyleColor(color),
                     borderTopColor = BorderBottomColor,
                     borderBottomColor = BorderBottomColor,
                     borderLeftColor = BorderBottomColor,
