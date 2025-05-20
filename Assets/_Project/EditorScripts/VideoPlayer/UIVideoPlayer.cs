@@ -1,7 +1,4 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Image = UnityEngine.UIElements.Image;
 
@@ -10,232 +7,155 @@ namespace PlaytestingReviewer.Video
     [UxmlElement]
     public partial class UIVideoPlayer : VisualElement, IVideoPlayer
     {
-        
-        private readonly string _defaultImagePath = PathManager.DefaultImagePath;
-        private readonly string _imageVideoLoadedPath = PathManager.ImageVideoLoadedPath;
+        // -------------------------------------------------- fields
+        UnityEngine.Video.VideoPlayer _player;
+        Image _target;
+        RenderTexture _rt;
+        float _pausedTime;
 
-        private readonly Image _videoRenderer;
-        private RenderTexture _renderTexture;
-        
-        private UnityEngine.Video.VideoPlayer _videoPlayer;
-        
-        private float _currentTime = 0;
-
+        // -------------------------------------------------- ctor
         public UIVideoPlayer()
         {
             style.flexDirection = FlexDirection.Row;
             style.flexGrow = 1;
 
-            var videoContainer = new VisualElement();
-            videoContainer.style.alignItems = Align.FlexStart;
-            videoContainer.style.flexGrow = 0;
-
-            Add(videoContainer);
-
-            _videoRenderer = new Image();
-            _videoRenderer.image = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
-            videoContainer.Add(_videoRenderer);
-            videoContainer.style.alignSelf = Align.FlexStart;
-
-
-            var defaultTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(_defaultImagePath);
-            if (defaultTexture != null)
+            var container = new VisualElement
             {
-                _videoRenderer.image = defaultTexture;
-            }
-            else
+                style = { flexGrow = 1, alignItems = Align.FlexStart }
+            };
+            Add(container);
+
+            _target = new Image();
+            container.Add(_target);
+
+            InitPlayer();
+
+            RegisterCallback<DetachFromPanelEvent>(_ => DisposePlayer());
+        }
+
+        // -------------------------------------------------- create VideoPlayer
+        void InitPlayer()
+        {
+            var go = new GameObject("RuntimeVideoPlayer")
             {
-                Debug.LogWarning($"Default image not found at '{_defaultImagePath}'");
-            }
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            _player = go.AddComponent<UnityEngine.Video.VideoPlayer>();
+            _player.playOnAwake = false;
+            _player.isLooping = false;
 
-            InitializeVideoPlayer();
-            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+            _rt = new RenderTexture(1920, 1080, 0);
+            _player.targetTexture = _rt;
+
+            /* ---------- update route ----------- */
+#if UNITY_EDITOR
+            // In the editor we can reuse the global update loop
+            UnityEditor.EditorApplication.update += UpdateFrame_Editor;
+#else
+            // In player builds use frameReady — no Editor API needed
+            _player.sendFrameReadyEvents = true;
+            _player.frameReady += (_, __) => PushTexture();
+#endif
         }
 
-        private void InitializeVideoPlayer()
-        {
-            GameObject videoObject = new GameObject("CustomVideoPlayer") { hideFlags = HideFlags.HideAndDontSave };
-
-            _videoPlayer = videoObject.AddComponent<UnityEngine.Video.VideoPlayer>();
-            _videoPlayer.playOnAwake = false;
-            _videoPlayer.isLooping = false;
-
-            _renderTexture = new RenderTexture(1920, 1080, 0);
-            _videoPlayer.targetTexture = _renderTexture;
-
-            EditorApplication.update += UpdateVideoFrame;
-        }
-
-        public void SetVideo(string path)
-        {
-            _videoPlayer.url = path;
-            _videoRenderer.image = AssetDatabase.LoadAssetAtPath<Texture2D>(_imageVideoLoadedPath);
-        }
+        // -------------------------------------------------- IVideoPlayer impl
+        public void SetVideo(string path) => _player.url = "file://" + path;
 
         public void Play()
-        {   
-            if(_videoPlayer.url == "") {return;}
+        {
+            if (string.IsNullOrEmpty(_player.url)) return;
+            if (_player.isPlaying) return;
 
-            if (_videoPlayer != null && !_videoPlayer.isPlaying)
-            {
-                _videoPlayer.Play();
-                _videoPlayer.time = _currentTime;
-            }
+            _player.time = _pausedTime;
+            _player.Play();
         }
 
         public void Pause()
         {
-            if (_videoPlayer != null && _videoPlayer.isPlaying)
-            {
-                _videoPlayer.Pause();
-                _currentTime = (float)_videoPlayer.time;
-            }
+            if (!_player.isPlaying) return;
+            _player.Pause();
+            _pausedTime = (float)_player.time;
+            PushTexture();
         }
 
-        public void Stop()
-        {
-            if (_videoPlayer != null)
-            {
-                _videoPlayer.Stop();
-            }
-        }
-        public void NextFrame(int frameCount = 1)
-        {
-            if (_videoPlayer == null || _videoPlayer.isPlaying) { return; }
+        public void Stop() => _player.Stop();
+        public bool IsPlaying() => _player.isPlaying;
 
-            if ((ulong)(_videoPlayer.frame + frameCount) <= _videoPlayer.frameCount)
-            {
-                _videoPlayer.frame += frameCount;
-            }
-
-            UpdateVideoFrame();
+        public float GetVideoLengthSeconds()
+        {
+            if (_player == null) return 0;
+            
+            return (float)_player.length;
         }
 
-        public void PreviousFrame(int frameCount = 1)
+        public void NextFrame(int n = 1)
         {
-            if (_videoPlayer == null || _videoPlayer.isPlaying) { return; }
+            SeekRelative(n);
+        }
 
-            if (_videoPlayer.frame - frameCount >= 0)
-            {
-                _videoPlayer.frame -= frameCount;
-            }
-
-            UpdateVideoFrame();
+        public void PreviousFrame(int n = 1)
+        {
+            SeekRelative(-n);
         }
 
         public void GoToStart()
         {
-            _videoPlayer.frame = 0;
+            _player.frame = 0;
         }
 
         public void GoToEnd()
         {
-            _videoPlayer.frame = (long)_videoPlayer.frameCount - 1;
+            _player.frame = (long)_player.frameCount - 1;
         }
 
-        public bool IsPlaying()
+        public float GetVideoLength() => (float)_player.length;
+        public int GetVideoLengthFrames() => (int)_player.frameCount;
+        public float GetCurrentTime() => (float)_player.time;
+        public int GetCurrentFrame() => (int)_player.frame;
+
+        public void SetFrame(int f)
         {
-            return _videoPlayer.isPlaying;
+            if (f < 0 || f >= (int)_player.frameCount) return;
+            _player.frame = f;
+            _pausedTime = (float)f / _player.frameRate;
+            PushTexture();
         }
 
-        public float GetVideoLength()
-        {
-            if (_videoPlayer == null)
-            {
-                Debug.LogWarning("Video player is null");
-                return 0;
-            }
+        public string GetVideoPath() => _player.url;
 
-            return (float)_videoPlayer.length;
+#if UNITY_EDITOR
+        void UpdateFrame_Editor()
+        {
+            if (_player == null || !_player.isPrepared) return;
+            if (_player.isPlaying) PushTexture();
+        }
+#endif
+
+        void PushTexture()
+        {
+            if (_player.texture == null) return;
+            MarkDirtyRepaint();
+            _target.image = _player.texture;
         }
 
-        private void UpdateVideoFrame()
+        void SeekRelative(int delta)
         {
-            _videoPlayer.skipOnDrop = true;
-            if (_videoPlayer.isPlaying == false)
-            {
-                return;
-            }
+            if (_player.isPlaying) return;
 
-            if (_videoPlayer != null && _videoPlayer.isPrepared && _renderTexture != null && _videoRenderer != null)
-            {
-                MarkDirtyRepaint();
-                _videoRenderer.image = _videoPlayer.texture;
-            }
+            long newFrame = _player.frame + delta;
+            newFrame = (long)Mathf.Clamp(newFrame, 0, _player.frameCount - 1);
+            _player.frame = newFrame;
+            PushTexture();
         }
 
-        private void OnDetachFromPanel(DetachFromPanelEvent evt)
+        // -------------------------------------------------- clean-up
+        void DisposePlayer()
         {
-            EditorApplication.update -= UpdateVideoFrame;
-            if (_renderTexture != null)
-            {
-                UnityEngine.Object.DestroyImmediate(_renderTexture);
-            }
-            if (_videoPlayer != null)
-            {
-                _videoPlayer.Stop();
-                UnityEngine.Object.DestroyImmediate(_videoPlayer.gameObject);
-            }
-        }
-
-        public float GetVideoLengthSeconds()
-        {
-            float videoLength = 0;
-            if (_videoPlayer != null)
-            {
-                videoLength = (float)_videoPlayer.length;
-            }
-
-            return videoLength;
-        }
-
-        public float GetCurrentTime()
-        {
-            float currentTime = 0;
-            if (_videoPlayer != null)
-            {
-                currentTime = (float)_videoPlayer.time;
-            }
-
-            return currentTime;
-        }
-
-        public int GetVideoLengthFrames()
-        {
-            int videoLengthFrames = 0;
-            if (_videoPlayer != null)
-            {
-                videoLengthFrames = (int)_videoPlayer.frameCount;
-            }
-
-            return videoLengthFrames;
-        }
-
-        public int GetCurrentFrame()
-        {
-            int currentFrame = 0;
-            if (_videoPlayer != null)
-            {
-                currentFrame = (int)_videoPlayer.frame;
-            }
-
-            return currentFrame;
-        }
-
-        public void SetFrame(int frame)
-        {
-            if (_videoPlayer == null) { return; }
-
-            if (frame >= 0 && frame < (long)_videoPlayer.frameCount)
-            {
-                _videoPlayer.frame = frame;
-                _currentTime = Mathf.Clamp01((float)frame / (float)_videoPlayer.frameCount);
-            }
-        }
-
-        public string GetVideoPath()
-        {
-            return _videoPlayer.url;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.update -= UpdateFrame_Editor;
+#endif
+            if (_rt != null) Object.DestroyImmediate(_rt);
+            if (_player != null) Object.DestroyImmediate(_player.gameObject);
         }
     }
 }

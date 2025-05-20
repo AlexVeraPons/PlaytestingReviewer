@@ -15,11 +15,11 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "1.566666"
+                            "value": "3.133332"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.230, 0.663, 0.189, 1.000)"
+                            "value": "RGBA(0.273, 0.649, 0.607, 1.000)"
                         }
                     ]
                 },
@@ -27,11 +27,11 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "2.766665"
+                            "value": "3.899998"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.671, 0.386, 0.588, 1.000)"
+                            "value": "RGBA(0.882, 0.062, 0.945, 1.000)"
                         }
                     ]
                 },
@@ -39,11 +39,11 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "4.199997"
+                            "value": "4.233331"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.411, 0.989, 0.042, 1.000)"
+                            "value": "RGBA(0.584, 0.855, 0.241, 1.000)"
                         }
                     ]
                 },
@@ -51,11 +51,11 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "1.566666"
+                            "value": "4.466664"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.230, 0.663, 0.189, 1.000)"
+                            "value": "RGBA(0.213, 0.052, 0.112, 1.000)"
                         }
                     ]
                 },
@@ -63,11 +63,11 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "2.766665"
+                            "value": "3.133332"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.671, 0.386, 0.588, 1.000)"
+                            "value": "RGBA(0.273, 0.649, 0.607, 1.000)"
                         }
                     ]
                 },
@@ -75,11 +75,35 @@
                     "keyValuePairs": [
                         {
                             "key": "time",
-                            "value": "4.199997"
+                            "value": "3.899998"
                         },
                         {
                             "key": "_currentColor",
-                            "value": "RGBA(0.411, 0.989, 0.042, 1.000)"
+                            "value": "RGBA(0.882, 0.062, 0.945, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.233331"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.584, 0.855, 0.241, 1.000)"
+                        }
+                    ]
+                },
+                {
+                    "keyValuePairs": [
+                        {
+                            "key": "time",
+                            "value": "4.466664"
+                        },
+                        {
+                            "key": "_currentColor",
+                            "value": "RGBA(0.213, 0.052, 0.112, 1.000)"
                         }
                     ]
                 }

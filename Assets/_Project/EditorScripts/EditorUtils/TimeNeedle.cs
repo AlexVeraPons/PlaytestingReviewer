@@ -1,120 +1,102 @@
 using System;
-using PlaytestingReviewer.Video;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using PlaytestingReviewer.Video;
+
+#if UNITY_EDITOR                 // NEW
+using UnityEditor;
+#endif
 
 namespace PlaytestingReviewer.Editors
 {
     /// <summary>
-    /// Represents a visual time indicator (needle) within the video playback interface.
-    /// This needle shows the current playback position of the video on the timeline
-    /// and updates dynamically as the video plays or when the user interacts with the timeline.
+    /// Shows the current playback position on the timeline.
     /// </summary>
     public class TimeNeedle
     {
-        private ITimePositionTranslator _timeIndicatorController;
-        
-        // External visual elements
-        private VisualElement _root;
-        private IVideoPlayer _videoPlayer;
-        private VisualElement _trackView;
-        
-        //Own visual elements
-        private VisualElement _timeNeedle;
-        private VisualElement _arrow;
+        // -------------------------------------------------- fields
+        readonly ITimePositionTranslator _timeTranslator;
+        readonly VisualElement _root;
+        readonly IVideoPlayer  _videoPlayer;
 
-        // Initialisation
-        public TimeNeedle(VisualElement root, TimeIndicatorController timeIndicatorController, IVideoPlayer videoPlayer)
+        VisualElement _trackView;
+        VisualElement _timeNeedle;
+        VisualElement _arrow;
+
+        // -------------------------------------------------- ctor
+        public TimeNeedle(VisualElement root,
+                          TimeIndicatorController translator,
+                          IVideoPlayer videoPlayer)
         {
-            _timeIndicatorController = timeIndicatorController;
-            _root = root;
-            _videoPlayer = videoPlayer;
+            _root           = root;
+            _timeTranslator = translator;
+            _videoPlayer    = videoPlayer;
+
+#if UNITY_EDITOR
             EditorApplication.update += Update;
+#else
+            RuntimeUpdateDispatcher.Tick += Update;      // NEW
+#endif
         }
 
-        public void Initialize()
+        // -------------------------------------------------- public API
+        public void Initialize() => SetUpTimeNeedle(_root);
+
+        // -------------------------------------------------- setup helpers
+        void SetUpTimeNeedle(VisualElement root)
         {
-            SetUpTimeNeedle(_root);
-        }
+            if (_timeNeedle != null) return;
 
-        private void SetUpTimeNeedle(VisualElement root)
-        {
-            if (_timeNeedle != null)
-            {
-                return;
-            }
+            _trackView ??= root.Q<VisualElement>("TrackView");
 
-            if (_trackView == null)
-            {
-                _trackView = root.Q<VisualElement>("TrackView");
-            }
+            _timeNeedle = new VisualElement();
+            _timeNeedle.AddToClassList("timeNeedle");
+            _timeNeedle.style.position        = Position.Absolute;
+            _timeNeedle.style.left            = 0;
+            _timeNeedle.style.width           = 3;
+            _timeNeedle.style.height          = _trackView.resolvedStyle.height;
+            _timeNeedle.style.backgroundColor = new StyleColor(new Color(.7f, .7f, .7f, 1f));
 
-            InitializeTimeNeedleBase(_trackView);
             CreateArrow(_timeNeedle);
             _trackView.Add(_timeNeedle);
         }
 
-        private void InitializeTimeNeedleBase(VisualElement trackView)
-        {
-            _timeNeedle = new VisualElement();
-            _timeNeedle.AddToClassList("timeNeedle");
-            _timeNeedle.style.position = Position.Absolute;
-            _timeNeedle.style.left = 0;
-            _timeNeedle.style.width = 3;
-            _timeNeedle.style.height = trackView.resolvedStyle.height;
-
-            _timeNeedle.style.backgroundColor = new StyleColor(new Color(0.7f, 0.7f, 0.7f, 1f));
-        }
-
-        private void CreateArrow(VisualElement parent)
+        void CreateArrow(VisualElement parent)
         {
             _arrow = new VisualElement();
             _arrow.AddToClassList("timeNeedleArrow");
-            _arrow.style.position = Position.Absolute;
-            _arrow.style.left = -2;
-            _arrow.style.width = 7;
-            _arrow.style.height = 7;
-            _arrow.style.backgroundColor = new StyleColor(new Color(0.7f, 0.7f, 0.7f, 1f));
-            _arrow.style.rotate = new StyleRotate(new Rotate(45));
+            _arrow.style.position        = Position.Absolute;
+            _arrow.style.left            = -2;
+            _arrow.style.width           = 7;
+            _arrow.style.height          = 7;
+            _arrow.style.backgroundColor = new StyleColor(new Color(.7f, .7f, .7f, 1f));
+            _arrow.style.rotate          = new StyleRotate(new Rotate(45));
             parent.Add(_arrow);
         }
 
-        //Updating the indicator 
-        
-        private void Update()
+        // -------------------------------------------------- per-frame update
+        void Update()
         {
-            if (_videoPlayer == null || _timeNeedle == null)
-            {
-                return;
-            }
+            if (_videoPlayer == null || _timeNeedle == null) return;
 
-            if (_trackView == null)
-            {
-                _trackView = _root.Q<VisualElement>("TrackView");
-            }
+            _trackView ??= _root.Q<VisualElement>("TrackView");
 
             UpdatePosition();
             UpdateNeedleSize();
         }
 
-        private void UpdatePosition()
+        void UpdatePosition()
         {
-            float position = _timeIndicatorController.GetXPositionFromTime(_videoPlayer.GetCurrentTime()); // gets the position of the needle
+            float pos = _timeTranslator.GetXPositionFromTime(_videoPlayer.GetCurrentTime());
 
-            // if its outside of view place it to the left
-            float desiredPosition = position - _trackView.worldBound.x;
-            if (desiredPosition < 0)
-            {
-                desiredPosition = 0;
-            }
+            // convert world-space X to local space of track view
+            float desired = pos - _trackView.worldBound.x;
+            if (desired < 0) desired = 0;
 
-            _timeNeedle.style.left = desiredPosition;
+            _timeNeedle.style.left = desired;
         }
 
-        private void UpdateNeedleSize()
-        {
+        void UpdateNeedleSize() =>
             _timeNeedle.style.height = _trackView.resolvedStyle.height;
-        }
     }
 }

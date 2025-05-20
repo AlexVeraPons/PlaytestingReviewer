@@ -68,6 +68,9 @@ namespace PlaytestingReviewer
         {
             string outFileName = $"ExtractedFrame_{id}.png";
             string outFilePath = Path.Combine(PathManager.FrameOutputPath, outFileName);
+            
+            if (!Directory.Exists(PathManager.FrameOutputPath))
+                Directory.CreateDirectory(PathManager.FrameOutputPath);
 
             bool success = await Task.Run(() =>
                 ExtractFrameInternal(videoPath, timeInSeconds, outFilePath)

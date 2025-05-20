@@ -15,7 +15,7 @@ namespace PlaytestingReviewer.Editors
         // CONSTANTS
         private const int InitialSpaceBetweenIndicators = 13;
         private const float LabelSize = 20f;
-        
+
         //Vidoe related
         private float _videoLength;
         private readonly IVideoPlayer _videoPlayer;
@@ -24,7 +24,7 @@ namespace PlaytestingReviewer.Editors
         private List<Label> _timeIndicators;
         private ScrollView timeScroll;
         private VisualElement timeView;
-    
+
         // Zooming and positioning
         private float _currentSpaceBetweenIndicators = 10f;
         private readonly ZoomUpdater _zoomUpdater;
@@ -50,13 +50,14 @@ namespace PlaytestingReviewer.Editors
             timeScroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             _zoomUpdater.OnZoomed += ZoomTimeIndicators;
         }
-        
+
         // UI management
         public void ReloadIndicators(float videoLength)
         {
+            timeView.contentContainer.Clear();
             _videoLength = videoLength;
             _timeIndicators = new List<Label>();
-            
+
             float trackViewWidth = timeScroll.resolvedStyle.width;
             int indicatorCount = Mathf.FloorToInt(trackViewWidth / (InitialSpaceBetweenIndicators + LabelSize));
 
@@ -103,9 +104,10 @@ namespace PlaytestingReviewer.Editors
                 float normalizedIndex = (float)i / (indicatorCount - 1);
                 labels[i] = Mathf.Round(Mathf.Lerp(0, videoLength, normalizedIndex) * 10) / 10f + "s";
             }
+
             return labels;
         }
-        
+
         //User interaction
         private void OnMouseDown(MouseDownEvent evt)
         {
@@ -132,7 +134,11 @@ namespace PlaytestingReviewer.Editors
         //Time calculations
         public float GetXPositionFromTime(float time)
         {
-            if (_timeIndicators == null) { return 0; }
+            if (_timeIndicators == null)
+            {
+                return 0;
+            }
+
             float initialLabel = _timeIndicators[0].worldBound.x;
 
 
@@ -152,13 +158,20 @@ namespace PlaytestingReviewer.Editors
             // Map the normalized position to the video length
             return Mathf.Lerp(0, videoLength, normalizedPosition);
         }
-        
+
         //Utility
         public bool IsSetupComplete()
         {
-            if (_timeIndicators == null || _timeIndicators.Count == 0) { return false; }
+            if (_timeIndicators == null || _timeIndicators.Count == 0)
+            {
+                return false;
+            }
+
             // if there is no video initialized then the labels will overlap
-            if (_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x) { return false; } //
+            if (_timeIndicators[0].worldBound.x == _timeIndicators[_timeIndicators.Count - 1].worldBound.x)
+            {
+                return false;
+            } //
 
             return true;
         }
@@ -169,5 +182,3 @@ namespace PlaytestingReviewer.Editors
         }
     }
 }
-
-

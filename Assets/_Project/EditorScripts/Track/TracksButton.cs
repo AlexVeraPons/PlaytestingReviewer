@@ -1,8 +1,6 @@
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.UIElements;
 using PlaytestingReviewer.Tracks;
-using UnityEditor.UIElements;
 
 namespace PlaytestingReviewer.Editors
 {

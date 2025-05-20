@@ -12,6 +12,7 @@ namespace PlaytestingReviewer.Editors
     {
         public string videoPath;
         public string tracksPath;
+        public TrackCollection trackCollection { get; set; }
 
         public TrackCollection GetTrackCollecion()
         {

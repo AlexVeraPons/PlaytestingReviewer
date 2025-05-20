@@ -1,84 +1,84 @@
 using System;
-using PlaytestingReviewer.Video;
-using UnityEngine.UIElements;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Video;
+using UnityEngine.UIElements;
+using PlaytestingReviewer.Video;
+
+#if UNITY_EDITOR
+using UnityEditor;                       // editor-only
+#endif
 
 namespace PlaytestingReviewer.Editors
 {
     /// <summary>
-    /// The VideoController class manages video playback, providing control functionalities
-    /// and handling interactions with the video player. It also facilitates communication
-    /// between related components in the context of video playback and editing.
-    ///
-    /// This also looks for the buttons and assigns them.
+    /// Manages video playback UI and raises events when the length changes
+    /// or the user hits Play.
     /// </summary>
     public class VideoController
     {
         public Action<float> OnNewVideoLengthAvailable;
-        public Action OnPlay;
+        public Action        OnPlay;
 
-        private IVideoPlayer _videoPlayer;
+        /* ------------------------------------------------------------ */
         public IVideoPlayer VideoPlayer => _videoPlayer;
-        private IntegerField _frameAmountField;
-        private int FrameAmount => _frameAmountField?.value ?? 1;
+        IVideoPlayer  _videoPlayer;
+        IntegerField  _frameAmountField;
 
-        private bool _isPlaying = false;
-        private float _videoLength = 0f;
-            
-        // Initialisation
-        
+        bool  _isPlaying;
+        float _videoLength;
+
+        int  FrameAmount  => _frameAmountField?.value ?? 1;
+
+        /* ------------------------------------------------------------ */
         public VideoController(VisualElement root)
         {
             SetUpVideoControls(root);
+
+#if UNITY_EDITOR
             EditorApplication.update += Update;
+#else
+            RuntimeUpdateDispatcher.Tick += Update;          // NEW
+#endif
         }
-        
-        //TODO: the setup should be done by the editor, this way ths class is not dependant on all those buttons to exist
-        private void SetUpVideoControls(VisualElement root)
+
+        /* ---------------- initial UI wiring ------------------------ */
+        void SetUpVideoControls(VisualElement root)
         {
             _videoPlayer = root.Q<UIVideoPlayer>("VideoPlayer");
-            AssignButton(root, "Play", TogglePlayPause);
-            AssignButton(root, "NextFrame", () => _videoPlayer.NextFrame(FrameAmount));
+
+            AssignButton(root, "Play",          TogglePlayPause);
+            AssignButton(root, "NextFrame",     () => _videoPlayer.NextFrame(FrameAmount));
             AssignButton(root, "PreviousFrame", () => _videoPlayer.PreviousFrame(FrameAmount));
-            AssignButton(root, "Start", _videoPlayer.GoToStart);
-            AssignButton(root, "End", _videoPlayer.GoToEnd);
+            AssignButton(root, "Start",         _videoPlayer.GoToStart);
+            AssignButton(root, "End",           _videoPlayer.GoToEnd);
 
             _frameAmountField = root.Q<IntegerField>("FrameSkipAmmount");
         }
-        
-        // Update 
-        
-        private void Update()
+
+        /* ---------------- heartbeat ------------------------ */
+        void Update()
         {
-            if (_videoPlayer == null || _isPlaying == false) { return; }
-            
+            if (_videoPlayer == null || !_isPlaying) return;
             CheckVideoLength();
         }
-        
-        private void CheckVideoLength()
+
+        void CheckVideoLength()
         {
-            float newLength = _videoPlayer.GetVideoLengthSeconds();
-            if (Math.Abs(newLength - _videoLength) > 0.01f) 
+            float newLen = _videoPlayer.GetVideoLengthSeconds();
+            if (Mathf.Abs(newLen - _videoLength) > 0.01f)
             {
-                _videoLength = newLength;
+                _videoLength = newLen;
                 OnNewVideoLengthAvailable?.Invoke(_videoLength);
             }
         }
-        
-        // Actions
 
-        private void AssignButton(VisualElement root, string buttonName, System.Action action)
+        /* ---------------- actions -------------------------- */
+        void AssignButton(VisualElement root, string name, Action action)
         {
-            Button button = root.Q<Button>(buttonName);
-            if (button != null)
-            {
-                button.clicked += action;
-            }
+            var btn = root.Q<Button>(name);
+            if (btn != null) btn.clicked += action;
         }
 
-        private void TogglePlayPause()
+        void TogglePlayPause()
         {
             if (_videoPlayer.IsPlaying())
             {
@@ -93,37 +93,26 @@ namespace PlaytestingReviewer.Editors
             }
         }
 
-        /// <summary>
-        /// Sets the video to be played using the specified file path. 
-        /// </summary>
-        /// <param name="path">The file path to the video to be loaded.</param>
         public void SetVideo(string path)
-
         {
             if (string.IsNullOrEmpty(path))
             {
-                Debug.LogWarning("VideoController: Attempted to set video with an invalid path.");
+                Debug.LogWarning("VideoController: empty path");
                 return;
             }
-            
+
             _videoPlayer.SetVideo(path);
             CheckVideoLength();
         }
 
-        /// <summary>
-        /// Moves the playback to a specified video frame.
-        /// </summary>
-        /// <param name="frame">The frame index to seek to in the video.</param>
         public void GoToVideoFrame(int frame)
         {
-            if (_videoPlayer.GetVideoLengthFrames() < frame) return;
-            if (frame < 0) return;
+            if (frame < 0 || frame > _videoPlayer.GetVideoLengthFrames()) return;
             _videoPlayer.SetFrame(frame);
         }
-        
-        // Getters
-        
+
+        /* ---------------- getters -------------------------- */
         public float GetVideoLength() => _videoPlayer.GetVideoLengthSeconds();
-        public bool IsPlaying() => _videoPlayer.IsPlaying();
+        public bool  IsPlaying()      => _videoPlayer.IsPlaying();
     }
 }

@@ -1,9 +1,8 @@
 using PlaytestingReviewer.Tracks;
 using UnityEditor;
-using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.UIElements;
-
+#if UNITY_EDITOR
 namespace PlaytestingReviewer.Editors
 {
     /// <summary>
@@ -24,9 +23,7 @@ namespace PlaytestingReviewer.Editors
         private TimeIndicatorController _timeIndicatorController;
         private TimeNeedle _timeNeedle;
         private ZoomUpdater _zoomUpdater;
-        private TracksButton _tracksButton;
 
-        [MenuItem("Tools/Playtest Reviewer")]
         public static void ShowEditorWindow()
         {
             var window = GetWindow<PlaytestReviewerEditor>();
@@ -73,12 +70,6 @@ namespace PlaytestingReviewer.Editors
             ScrollView timeScroll = root.Q<ScrollView>("TimeScroll");
 
 
-            // 2) hand that, plus your TrackCollection and time‐translator, to the runtime helper
-            _tracksButton = new TracksButton(
-                root,
-                new TrackCollection(),
-                _timeIndicatorController
-            );
 
 
             // synchronize scrolling exactly as before
@@ -91,7 +82,6 @@ namespace PlaytestingReviewer.Editors
         public void OpenWindow(Review review)
         {
             ShowEditorWindow();
-            PopulateTracks(review.GetTrackCollecion());
             InitializeVideo(review.videoPath);
 
             Label nameLabel = rootVisualElement.Q<Label>("RecordingName");
@@ -102,28 +92,6 @@ namespace PlaytestingReviewer.Editors
         {
             _videoController.SetVideo(path);
         }
-
-        private void PopulateTracks(TrackCollection collection)
-        {
-            _tracksButton.SetTrackCollection(collection);
-        }
-
-        [OnOpenAsset(1)]
-        public static bool OnOpenAsset(int instanceID, int line)
-        {
-            var obj = EditorUtility.InstanceIDToObject(instanceID) as Review;
-            if (obj == null)
-                return false;
-
-            var window = GetWindow<PlaytestReviewerEditor>();
-            window.titleContent = new GUIContent("Playtest Reviewer");
-
-            window.PopulateTracks(obj.GetTrackCollecion());
-            window.InitializeVideo(obj.videoPath);
-            var nameLabel = window.rootVisualElement.Q<Label>("RecordingName");
-            nameLabel.text = obj.name;
-
-            return true;
-        }
     }
 }
+#endif

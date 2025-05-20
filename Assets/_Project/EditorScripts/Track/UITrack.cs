@@ -1,6 +1,4 @@
 using System;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -43,7 +41,7 @@ namespace PlaytestingReviewer.Editors
 
             DescriptionRoot = description;
             InfoRoot = information;
-            EditorApplication.update += TrackUpdate;
+            RuntimeUpdateDispatcher.Tick += TrackUpdate;
 
             Initialization();
         }
@@ -237,7 +235,6 @@ namespace PlaytestingReviewer.Editors
 
             // Button for context menu
             var button = new Button() { text = ":" };
-            button.clicked += OnThreeDotsClicked;
             button.style.marginLeft = 10;
             DescriptionContainer.Add(button);
 
@@ -245,21 +242,6 @@ namespace PlaytestingReviewer.Editors
         }
 
         
-        private void OnThreeDotsClicked()
-        {
-            var menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Delete Track"), false, DeleteTrack);
-            AddMenuItems(menu);
-            menu.ShowAsContext();
-        }
-
-        /// <summary>
-        /// Override this method to include additional menu options specific to the implementation.
-        /// </summary>
-        /// <param name="menu">The GenericMenu instance to which new menu items can be added to.</param>
-        protected virtual void AddMenuItems(GenericMenu menu)
-        {
-        }
 
         private void DeleteTrack()
         {

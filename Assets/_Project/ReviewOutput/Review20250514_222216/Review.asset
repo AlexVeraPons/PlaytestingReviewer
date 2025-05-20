@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 32adadd45e7b17044bb59d2b91457b8d, type: 3}
-  m_Name: Review20250507_171118
+  m_Name: Review
   m_EditorClassIdentifier: 
-  videoPath: Assets/_Project/ReviewOutput/Review20250507_171118/Review20250507_171118.mp4
-  tracksPath: Assets/_Project/ReviewOutput/Review20250507_171118/Review20250507_171118.review.json
+  videoPath: Assets/_Project/ReviewOutput/Review20250514_222216\Review.mp4
+  tracksPath: Assets/_Project/ReviewOutput/Review20250514_222216\Review20250514_222216.review.json

@@ -1,7 +1,7 @@
 using PlaytestingReviewer.Editors;
 using UnityEngine;
 using UnityEngine.UIElements;
-using PlaytestingReviewer.Tracks; // your namespace
+using PlaytestingReviewer.Tracks;
 
 [RequireComponent(typeof(UIDocument))]
 public class PlaytestReviewerRuntime : MonoBehaviour
@@ -9,17 +9,15 @@ public class PlaytestReviewerRuntime : MonoBehaviour
     [SerializeField] private Review _review;
 
     private VideoController _videoController;
-    private TimeIndicatorController _timeIndicatorController;
+    private TimeIndicatorController M;
     private TimeNeedle _timeNeedle;
     private ZoomUpdater _zoomUpdater;
-    private TracksButton _tracksButton;
+    private TimeIndicatorController _timeIndicatorController;
 
     void Awake()
     {
-        // 1) Grab the UXML root
         var root = GetComponent<UIDocument>().rootVisualElement;
 
-        // 2) Wire up your controllers just like in the EditorWindow
         _zoomUpdater = new ZoomUpdater();
         _zoomUpdater.SubscribeToZoom(root);
 
@@ -40,7 +38,7 @@ public class PlaytestReviewerRuntime : MonoBehaviour
         var timeView = root.Q<ScrollView>("TimeScroll");
         var timeViewVE = root.Q<VisualElement>("TimeView");
 
-        var icon = Resources.Load<Texture2D>("VideoPreviewIcon"); // or load however you package it
+        var icon = Resources.Load<Texture2D>("VideoPreviewIcon");
         var previewTrack = new VideoPreviewTrack(desc, info, _timeIndicatorController, _videoController.VideoPlayer);
         previewTrack.AdaptToWidth(timeViewVE);
         previewTrack.SetTrackIcon(icon);
@@ -59,20 +57,64 @@ public class PlaytestReviewerRuntime : MonoBehaviour
     public void LoadReview()
     {
         Review review = _review;
-        _tracksButton.SetTrackCollection(review.GetTrackCollecion());
         _videoController.SetVideo(review.videoPath);
 
         var nameLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("RecordingName");
         nameLabel.text = review.name;
     }
 
-    public void LoadReview(string trackCollection, string videoPath)
+    public void LoadReview(string trackCollectionPath, string videoPath)
     {
-        Review review = _review;
-        TrackCollection collection = new TrackCollection(trackCollection);
+        // 1. Clear existing visual tracks (optional safety)
+        var root = GetComponent<UIDocument>().rootVisualElement;
+        var desc = root.Q<ScrollView>("TrackDescriptions");
+        var info = root.Q<ScrollView>("TrackInformation");
+        var timeView = root.Q<ScrollView>("TimeScroll");
+        var timeViewVE = root.Q<VisualElement>("TimeView");
+
+        desc.Clear();
+        info.Clear();
+        timeViewVE.Clear();
+
+        // 2. Load video
         _videoController.SetVideo(videoPath);
 
-        var nameLabel = GetComponent<UIDocument>().rootVisualElement.Q<Label>("RecordingName");
-        nameLabel.text = "review";
+        // 3. Load tracks from JSON
+        TrackCollection collection = new TrackCollection(trackCollectionPath);
+        _review = new Review
+        {
+            videoPath = videoPath,
+            tracksPath = trackCollectionPath,
+            name = System.IO.Path.GetFileNameWithoutExtension(videoPath),
+            trackCollection = collection
+        };
+
+        var icon = Resources.Load<Texture2D>("VideoPreviewIcon"); // assumes icon is in Resources
+        var previewTrack = new VideoPreviewTrack(
+            desc,
+            info,
+            _timeIndicatorController,
+            _videoController.VideoPlayer
+        );
+        previewTrack.AdaptToWidth(timeViewVE);
+        previewTrack.SetTrackIcon(icon);
+        // 4. Create tracks from factory
+        foreach (var track in collection.tracks)
+        {
+            var trackUI = UITrackFactory.CreateUITrack(
+                track,
+                desc,
+                info,
+                _timeIndicatorController,
+                timeViewVE
+            );
+            trackUI.AdaptToWidth(timeViewVE);
+        }
+
+        info.horizontalScroller.valueChanged += v => timeView.horizontalScroller.value = v;
+        timeView.horizontalScroller.valueChanged += v => info.horizontalScroller.value = v;
+        desc.verticalScroller.valueChanged += v => info.verticalScroller.value = v;
+        info.verticalScroller.valueChanged += v => desc.verticalScroller.value = v;
+
     }
 }

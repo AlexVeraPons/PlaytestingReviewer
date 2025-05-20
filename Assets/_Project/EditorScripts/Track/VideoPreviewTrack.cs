@@ -110,6 +110,9 @@ namespace PlaytestingReviewer.Editors
             }
 
             string videoPath = _videoPlayer.GetVideoPath();
+            if (videoPath.StartsWith("file://"))
+                videoPath = videoPath.Substring("file://".Length);
+
             var framePaths = await FFmpegUtils.ExtractBatchFramesAsync(videoPath,
                 times,
                 "previewBatch");
