@@ -7,7 +7,6 @@ namespace PlaytestingReviewer.Tracks
     public class Track
     {
         public TrackType type;
-        public string iconName;
         public string name;
         public Color color;
         [SerializeField] public List<SerializableDictionary> instances = new List<SerializableDictionary>();

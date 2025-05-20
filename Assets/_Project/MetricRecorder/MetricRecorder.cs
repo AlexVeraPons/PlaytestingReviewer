@@ -39,7 +39,6 @@ namespace PlaytestingReviewer.Tracks
 
         private void Update()
         {
-            // If there's no VideoCapture, we simulate "time" ourselves.
             if (_videoCapture == null)
             {
                 _selfCurrentTime += Time.deltaTime;
@@ -65,7 +64,6 @@ namespace PlaytestingReviewer.Tracks
                 type = TrackType.Metric,
                 name = metricName,
                 color = metricColor,
-                iconName = "DefaultIcon",
                 instances = new List<SerializableDictionary>()
             };
         }
@@ -80,20 +78,7 @@ namespace PlaytestingReviewer.Tracks
                 var sourceType = evt.eventSource.GetType();
                 BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-                // 1) .NET event (C# event)
-                evt.dotNetEvent = sourceType.GetEvent(evt.eventName, flags);
-                if (evt.dotNetEvent != null)
-                {
-                    Type eventHandlerType = evt.dotNetEvent.EventHandlerType;
-                    evt.eventDelegate = CreateDelegateForEvent(eventHandlerType);
-
-                    bool isStatic = evt.dotNetEvent.GetAddMethod().IsStatic;
-                    object target = isStatic ? null : evt.eventSource;
-                    evt.dotNetEvent.AddEventHandler(target, evt.eventDelegate);
-                    continue;
-                }
-
-                // 2) UnityEvent field
+                // UnityEvent field
                 evt.unityEventField = sourceType.GetField(evt.eventName, flags);
                 if (evt.unityEventField != null &&
                     typeof(UnityEventBase).IsAssignableFrom(evt.unityEventField.FieldType))
@@ -101,7 +86,6 @@ namespace PlaytestingReviewer.Tracks
                     var unityEvent = evt.unityEventField.GetValue(evt.eventSource) as UnityEventBase;
                     if (unityEvent != null)
                     {
-                        // We add a listener: use reflection to call AddListener(UnityAction)
                         MethodInfo addListenerMethod = unityEvent.GetType()
                             .GetMethod("AddListener", new Type[] { typeof(UnityAction) });
                         if (addListenerMethod != null)
@@ -114,7 +98,7 @@ namespace PlaytestingReviewer.Tracks
                     continue;
                 }
 
-                // 3) Delegate field (e.g. System.Action)
+                // System.Action
                 evt.systemActionField = sourceType.GetField(evt.eventName, flags);
                 if (evt.systemActionField != null &&
                     typeof(Delegate).IsAssignableFrom(evt.systemActionField.FieldType))
@@ -131,21 +115,12 @@ namespace PlaytestingReviewer.Tracks
         {
             foreach (var evt in _eventsToTrack)
             {
-                // 1) .NET event
-                if (evt.dotNetEvent != null && evt.eventDelegate != null)
-                {
-                    bool isStatic = evt.dotNetEvent.GetRemoveMethod().IsStatic;
-                    object target = isStatic ? null : evt.eventSource;
-                    evt.dotNetEvent.RemoveEventHandler(target, evt.eventDelegate);
-                }
 
-                // 2) UnityEvent
                 if (evt.unityEventField != null)
                 {
                     var unityEvent = evt.unityEventField.GetValue(evt.eventSource) as UnityEventBase;
                     if (unityEvent != null)
                     {
-                        // remove the same action: OnUnityEventFired
                         MethodInfo removeListenerMethod = unityEvent.GetType()
                             .GetMethod("RemoveListener", new Type[] { typeof(UnityAction) });
                         if (removeListenerMethod != null)
@@ -156,7 +131,6 @@ namespace PlaytestingReviewer.Tracks
                     }
                 }
 
-                // 3) Delegate field
                 if (evt.systemActionField != null && evt.systemActionDelegate != null)
                 {
                     Delegate existing = evt.systemActionField.GetValue(evt.eventSource) as Delegate;
@@ -320,11 +294,9 @@ namespace PlaytestingReviewer.Tracks
                                 }
                             }
 
-                            // Remove button
                             if (GUILayout.Button("Remove Event", GUILayout.Width(120)))
                             {
                                 eventsList.DeleteArrayElementAtIndex(i);
-                                // Important: break or continue after removing to avoid out-of-range
                                 break;
                             }
                         }
@@ -372,7 +344,6 @@ namespace PlaytestingReviewer.Tracks
                                 }
                             }
 
-                            // Remove button
                             if (GUILayout.Button("Remove Property", GUILayout.Width(120)))
                             {
                                 propertiesList.DeleteArrayElementAtIndex(i);
@@ -401,18 +372,12 @@ namespace PlaytestingReviewer.Tracks
             Type type = target.GetType();
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-            // 1) .NET events
-            var dotNetEvents = type.GetEvents(flags).Select(e => e.Name);
-            eventNames.AddRange(dotNetEvents);
-
-            // 2) UnityEvent fields
-            var unityEventFields = type.GetFields(flags)
+            IEnumerable<String> unityEventFields = type.GetFields(flags)
                 .Where(f => typeof(UnityEventBase).IsAssignableFrom(f.FieldType))
                 .Select(f => f.Name);
             eventNames.AddRange(unityEventFields);
 
-            // 3) Delegate fields (System.Action, etc.)
-            var delegateFields = type.GetFields(flags)
+            IEnumerable<String> delegateFields = type.GetFields(flags)
                 .Where(f => typeof(Delegate).IsAssignableFrom(f.FieldType)
                             && f.FieldType.BaseType == typeof(MulticastDelegate))
                 .Select(f => f.Name);
@@ -429,14 +394,9 @@ namespace PlaytestingReviewer.Tracks
             Type type = target.GetType();
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
 
-            // Public or non-public properties with a getter
             propNames.AddRange(
                 type.GetProperties(flags).Where(p => p.CanRead).Select(p => p.Name)
             );
-
-            // Fields
-            propNames.AddRange(type.GetFields(flags).Select(f => f.Name));
-
             return propNames;
         }
     }

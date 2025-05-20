@@ -22,17 +22,14 @@ namespace PlaytestingReviewer.Tracks
 
         private void Awake()
         {
-            // Find the collector & capture if not wired
             if (_trackCollector == null)
                 _trackCollector = FindFirstObjectByType<TrackCollector>();
             if (_videoCapture == null)
                 _videoCapture = FindFirstObjectByType<VideoCapture>();
 
-            // Prepare a new output directory
             _folderName = "Review" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
             CreateFutureDirectory();
 
-            // Tell the capture where to write its .mp4
             _videoCapture.outputPath = _folderPath;
             _videoCapture.outputFileName = _folderName + ".mp4";
         }
@@ -40,14 +37,11 @@ namespace PlaytestingReviewer.Tracks
         private void CreateFutureDirectory()
         {
 #if UNITY_EDITOR
-            // Editor: under Assets/_Project/ReviewOutput/<folderName>
             const string rootAssetsPath = "Assets/_Project/ReviewOutput";
 
-            // ensure the root exists
             if (!AssetDatabase.IsValidFolder(rootAssetsPath))
                 AssetDatabase.CreateFolder("Assets/_Project", "ReviewOutput");
 
-            // make the timestamped subfolder
             AssetDatabase.CreateFolder(rootAssetsPath, _folderName);
 
             _folderPath = Path.Combine(rootAssetsPath, _folderName).Replace("\\", "/");
@@ -74,7 +68,6 @@ namespace PlaytestingReviewer.Tracks
 
         private void CreateReviewOutput()
         {
-            // 1) Dump tracks JSON
             var tracks = _trackCollector?.GetTracks();
             string trackJsonPath = Path.Combine(
                 _folderPath,

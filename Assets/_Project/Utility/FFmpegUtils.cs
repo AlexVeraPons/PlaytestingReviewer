@@ -68,16 +68,18 @@ namespace PlaytestingReviewer
         {
             string outFileName = $"ExtractedFrame_{id}.png";
             string outFilePath = Path.Combine(PathManager.FrameOutputPath, outFileName);
+            string directory = Path.GetDirectoryName(outFilePath);
+            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
 
             bool success = await Task.Run(() =>
                 ExtractFrameInternal(videoPath, timeInSeconds, outFilePath)
             );
 
             if (!success) return null;
-            
+
             FrameFromVideoReady?.Invoke(outFilePath);
             return outFilePath;
-
         }
 
         /// <summary>
@@ -96,7 +98,6 @@ namespace PlaytestingReviewer
             var extractedPaths = new List<string>();
             var tasks = new List<Task<string>>();
 
-            // Create and start one Task per frame
             for (int i = 0; i < times.Count; i++)
             {
                 float time = times[i];
@@ -106,7 +107,6 @@ namespace PlaytestingReviewer
 
             string[] results = await Task.WhenAll(tasks);
 
-            // Filter out any nulls
             foreach (string framePath in results)
             {
                 if (!string.IsNullOrEmpty(framePath))
@@ -162,9 +162,6 @@ namespace PlaytestingReviewer
             }
             catch (Exception ex)
             {
-                
-                
-                
                 Debug.LogError($"Error deleting frames or .meta files: {ex.Message}");
             }
         }
